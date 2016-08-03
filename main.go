@@ -19,6 +19,8 @@ func main() {
 	}
 
 	cmd := exec.Command("go", args[1:]...)
+	cmd.Stdout, cmd.Stderr, cmd.Stdin = os.Stdout, os.Stderr, os.Stdin
+
 	if err := cmd.Run(); err != nil {
 		os.Exit(1) // TODO get exitcode from cmd (there must be a cross-platform pkg for this?)
 	}
