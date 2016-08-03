@@ -1,9 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
+)
+
+var (
+	A string
+	B string
 )
 
 func init() {
@@ -11,11 +17,12 @@ func init() {
 }
 
 func main() {
+	fmt.Println("A=", A, "B=", B)
 	args := os.Args
 	if len(args) < 2 {
-		log.Fatal(`govvv: not enough arguments (example: "govvv build .")`)
+		log.Fatal(`govvv: not enough arguments (try "govvv build .")`)
 	} else if args[1] != "build" {
-		log.Fatal(`govvv: can be used only with subcommand "build"`)
+		log.Fatalf(`govvv: try "go %s" instead`, args[1])
 	}
 
 	cmd := exec.Command("go", args[1:]...)
