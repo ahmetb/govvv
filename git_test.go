@@ -63,15 +63,36 @@ func TestState(t *testing.T) {
 	require.EqualValues(t, "clean", s3)
 }
 
+func TestBranch(t *testing.T) {
+	repo := newRepo(t)
+	defer os.RemoveAll(repo.dir)
+
+	// default branch "master"
+	mkCommit(t, repo, "commit 1")
+	mkCommit(t, repo, "commit 2")
+	require.EqualValues(t, "master", repo.Branch())
+
+	// move into detached state: "HEAD"
+	_, err := repo.exec("checkout", "HEAD~1")
+	require.Nil(t, err)
+	require.EqualValues(t, "HEAD", repo.Branch())
+
+	// checkout into another branch
+	_, err = repo.exec("checkout", "-b", "foo")
+	require.Nil(t, err)
+	require.EqualValues(t, "foo", repo.Branch())
+}
+
 // Test utilities
 
 func newRepo(t *testing.T) git {
 	dir, err := ioutil.TempDir("", "gitrepo")
 	require.Nil(t, err, "failed to create test dir")
 
-	_, err = git{dir}.exec("init", "-q", dir)
+	repo := git{dir}
+	_, err = repo.exec("init", "-q", dir)
 	require.Nil(t, err, "failed to initialize git repo")
-	return git{dir}
+	return repo
 }
 
 func mkCommit(t *testing.T, repo git, msg string) {

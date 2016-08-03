@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 type git struct {
@@ -16,7 +17,7 @@ func (g git) exec(args ...string) (string, error) {
 	c.Dir = g.dir
 	c.Stderr = &errOut
 	out, err := c.Output()
-	outStr := string(out)
+	outStr := strings.TrimSpace(string(out))
 	if err != nil {
 		err = fmt.Errorf("git: error=%q stderr=%s", err, string(errOut.Bytes()))
 	}
@@ -39,4 +40,16 @@ func (g git) State() (string, error) {
 		return "dirty", nil
 	}
 	return "clean", nil
+}
+
+// Branch returns the branch name. If it is detached,
+// or an error occurs, returns "HEAD".
+func (g git) Branch() string {
+	out, err := g.exec("symbolic-ref", "-q", "--short", "HEAD")
+	if err != nil {
+		// might be failed due to another reason, but assume it's
+		// exit code 1 from `git symbolic-ref` in detached state.
+		return "HEAD"
+	}
+	return out
 }
