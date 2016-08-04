@@ -28,8 +28,8 @@ func TestGetValues(t *testing.T) {
 	require.Nil(t, err)
 
 	// validate the flags
-	require.Regexp(t, "^[0-9]{4}(-[0-9]{2}){2}T([0-9]{2}:){2}[0-9]{2}Z$", fl["BuildDate"])
-	require.Regexp(t, "^[0-9a-f]{7}$", fl["GitCommit"])
-	require.Equal(t, "master", fl["GitBranch"])
-	require.Equal(t, "clean", fl["GitState"])
+	require.Regexp(t, "^[0-9]{4}(-[0-9]{2}){2}T([0-9]{2}:){2}[0-9]{2}Z$", fl["main.BuildDate"])
+	require.Regexp(t, "^[0-9a-f]{7}$", fl["main.GitCommit"])
+	require.Equal(t, "master", fl["main.GitBranch"])
+	require.Equal(t, "clean", fl["main.GitState"])
 }
