@@ -33,13 +33,15 @@ package main
 import "fmt"
 
 var (
+    // these values are provided by govvv at compile-time
 	GitCommit, GitState string
 )
 
 func version() string { return GitCommit + "-" + GitState }
 
 func main() {
-	fmt.Printf("running build %s", version())
+	fmt.Printf("Hello! build=%s", version())
+	// Hello! build=e32f923-dirty
 }
 ```
 
