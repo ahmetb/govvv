@@ -3,6 +3,7 @@ language: go
 go: go1.6
 install:
   - go get -u github.com/golang/lint/golint
+  - go get -u github.com/stretchr/testify/require
   - sudo add-apt-repository ppa:duggan/bats --yes
   - sudo apt-get update -qq
   - sudo apt-get install -qq bats
