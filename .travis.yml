@@ -11,9 +11,9 @@ before_script:
   - git config --global user.email "test@example.com"
   - git config --global user.name "Test User"
 script:
-  - test -z "$(gofmt -s -l -w .) | tee /dev/stderr)"
+  - test -z "$(gofmt -s -l -w . | tee /dev/stderr)"
   - test -z "$(golint . | tee /dev/stderr)"
-  - test -z "$(go vet -v ./...) | tee /dev/stderr)"
+  - test -z "$(go vet -v ./... | tee /dev/stderr)"
   - go list ./... | grep -v '/integration-test/' | xargs go test -v -cover
   - go install
   - bats integration-test
