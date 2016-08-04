@@ -6,19 +6,78 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_mkldFlags(t *testing.T) {
-	cases := []struct {
-		in  map[string]string
-		out string
-	}{
-		{map[string]string{}, ""},
-		{map[string]string{"a": "b"}, `a="b"`},
-		{map[string]string{"main.Version": "b"}, `main.Version="b"`},
-		{map[string]string{"foo": "bar quux"}, `foo="bar quux"`},
+func Test_mkldFlags_fails(t *testing.T) {
+	_, err := mkLdFlags(map[string]string{"key space": "val"})
+	require.NotNil(t, err)
+	require.Contains(t, err.Error(), "key contains whitespaces")
+
+	_, err = mkLdFlags(map[string]string{"key": "val space"})
+	require.NotNil(t, err)
+	require.Contains(t, err.Error(), "value contains whitespaces")
+}
+
+func Test_addLdFlags(t *testing.T) {
+	{ // -ldflags already exists
+		_, err := addLdFlags([]string{"build", "-v", "-ldflags", "-X main.Foo=bar"}, "NEW VALUE")
+		require.NotNil(t, err)
+		require.EqualError(t, err, "already have a ldflags flag")
 	}
-	for _, c := range cases {
-		out := mkLdFlags(c.in)
-		require.EqualValues(t, c.out, out, "input: %#v", c.in)
+	{ // cannot find where to append ldflags
+		_, err := addLdFlags([]string{"a", "b", "c"}, "NEW VALUE")
+		require.NotNil(t, err)
+		require.EqualError(t, err, "cannot locate where to append -ldflags")
+	}
+	{ // adds it after "build"
+		val := "NEW VALUE"
+		cases := []struct {
+			in  []string
+			out []string
+		}{
+			{
+				[]string{"build"},
+				[]string{"build", "-ldflags", val},
+			},
+			{
+				[]string{"build", "-v"},
+				[]string{"build", "-ldflags", val, "-v"},
+			},
+			{
+				[]string{"-v", "build", "."},
+				[]string{"-v", "build", "-ldflags", val, "."},
+			},
+			{
+				[]string{"build", "-aflag", "-v", "."},
+				[]string{"build", "-ldflags", val, "-aflag", "-v", "."},
+			},
+		}
+
+		for _, c := range cases {
+			out, err := addLdFlags(c.in, val)
+			require.Nil(t, err)
+			require.Equal(t, c.out, out, "input args=%#v", c.in)
+		}
+	}
+}
+
+func Test_mkldFlags(t *testing.T) {
+	{ // empty
+		out, err := mkLdFlags(map[string]string{})
+		require.Nil(t, err)
+		require.Empty(t, out)
+	}
+	{ // normal input
+		out, err := mkLdFlags(map[string]string{
+			"key1": "val1",
+			"key2": "val2",
+		})
+		require.Nil(t, err)
+		expected := []string{
+			"-X key1=val1 -X key2=val2",
+			"-X key2=val2 -X key1=val1"}
+
+		if out != expected[0] && out != expected[1] {
+			t.Fatalf("output: %q, expected: either %q --or-- %q", out, expected[0], expected[1])
+		}
 	}
 }
 
@@ -61,11 +120,12 @@ func Test_findArg(t *testing.T) {
 		out int
 	}{
 		{[]string{"foo", "bar", "quux"}, "none", -1},
-		{[]string{"foo", "bar=", "quux"}, "bar", 1},
-		{[]string{"-arg1", "-arg2", "-arg3"}, "-arg2", -1},
+		{[]string{"foo", "bar", "quux"}, "bar", 1},
+		{[]string{"foo", "bar=val", "quux"}, "bar", 1},
+		{[]string{"foo", "bar=val", "quux"}, "bar", 1},
 		{[]string{"-arg1=bar", "-arg2"}, "-arg1", 0},
 		{[]string{"-arg1=foo", "-arg2=foo"}, "-arg2", 1},
-		{[]string{"-arg1", "-arg2=foo", "-arg3"}, "-arg4", -1},
+		{[]string{"-foo", "--bar"}, "-bar", -1},
 	}
 	for _, c := range cases {
 		out := findArg(c.in, c.key)
