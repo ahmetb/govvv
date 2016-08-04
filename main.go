@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -15,18 +16,38 @@ func main() {
 	if len(args) < 2 {
 		log.Fatal(`govvv: not enough arguments (try "govvv build .")`)
 	} else if args[1] != "build" {
-		log.Fatalf(`govvv: try "go %s" instead`, args[1])
+		log.Fatalf(`govvv: only works with "build". try "go %s" instead`, args[1])
 	}
 
-	args = args[1:]                   // strip the executable name
-	args, err := addLdFlags(args, "") // add ldflags
+	wd, err := os.Getwd()
 	if err != nil {
+		log.Fatalf("govvv: cannot get working directory: %v", err)
+	}
+	if err := process(wd, args[1:]); err != nil {
 		log.Fatal(err)
+	}
+}
+
+// process calls go tool with provided args (should not contain)
+// the name of the current process in args[0])
+func process(dir string, args []string) error {
+	vals, err := GetFlags(dir)
+	if err != nil {
+		return fmt.Errorf("govvv: failed to collect values: %v", err)
+	}
+	ldflags, err := mkLdFlags(vals)
+	if err != nil {
+		return fmt.Errorf("govvv: failed to compile values: %v", err)
+	}
+
+	args, err = addLdFlags(args, ldflags)
+	if err != nil {
+		return fmt.Errorf("cannot add ldflags: %v", err)
 	}
 	if err := execGoTool(args); err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+		return fmt.Errorf("go tool failed: %v", err)
 	}
+	return nil
 }
 
 // execGoTool invokes "go" with given arguments and passes the current

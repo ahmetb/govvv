@@ -7,9 +7,7 @@ import (
 
 // GetFlags collects data to be passed as ldflags.
 func GetFlags(dir string) (map[string]string, error) {
-	date := BuildDate()
 	repo := git{dir}
-
 	gitBranch := repo.Branch()
 	gitCommit, err := repo.Commit()
 	if err != nil {
@@ -21,14 +19,14 @@ func GetFlags(dir string) (map[string]string, error) {
 	}
 
 	return map[string]string{
-		"BuildDate": date,
-		"GitCommit": gitCommit,
-		"GitBranch": gitBranch,
-		"GitState":  gitState,
+		"main.BuildDate": date(),
+		"main.GitCommit": gitCommit,
+		"main.GitBranch": gitBranch,
+		"main.GitState":  gitState,
 	}, nil
 }
 
-// BuildDate returns the UTC date formatted in RFC 3339 layout.
-func BuildDate() string {
+// date returns the UTC date formatted in RFC 3339 layout.
+func date() string {
 	return time.Now().UTC().Format(time.RFC3339)
 }
