@@ -16,23 +16,60 @@ func Test_mkldFlags_fails(t *testing.T) {
 	require.Contains(t, err.Error(), "value contains whitespaces")
 }
 
-func Test_addLdFlags(t *testing.T) {
-	{ // -ldflags already exists
-		_, err := addLdFlags([]string{"build", "-v", "-ldflags", "-X main.Foo=bar"}, "NEW VALUE")
-		require.NotNil(t, err)
-		require.EqualError(t, err, "already have a ldflags flag")
+func Test_appendToFlag(t *testing.T) {
+	v := "VALUE"
+	cases := []struct{ in, out string }{
+		{"-arg", "-arg=VALUE"},
+		{"-arg=", "-arg=VALUE"},
+		{"-arg=OLD", "-arg=OLD VALUE"},
+		{"-arg=OLD ", "-arg=OLD VALUE"},
 	}
+	for _, c := range cases {
+		out := appendToFlag(c.in, v)
+		require.Equal(t, c.out, out, "input=%q", cases)
+	}
+}
+
+func Test_addLdFlags(t *testing.T) {
+	type testcase struct {
+		in  []string
+		out []string
+	}
+	validateCases := func(tc []testcase, ldflagsVal string) {
+		for _, c := range tc {
+			out, err := addLdFlags(c.in, ldflagsVal)
+			require.Nil(t, err)
+			require.Equal(t, c.out, out, "input args=%#v", c.in)
+		}
+	}
+
 	{ // cannot find where to append ldflags
 		_, err := addLdFlags([]string{"a", "b", "c"}, "NEW VALUE")
 		require.NotNil(t, err)
 		require.EqualError(t, err, "cannot locate where to append -ldflags")
 	}
+	{
+		// modifies existing -ldflags
+		val := "NEW"
+		cases := []testcase{
+			{
+				[]string{"build", "-ldflags"},
+				[]string{"build", "-ldflags=NEW"},
+			},
+			{
+				[]string{"build", "-ldflags", "OLD"},
+				[]string{"build", "-ldflags=OLD NEW"},
+			},
+			{
+				[]string{"-v", "build", "-ldflags=OLD"},
+				[]string{"-v", "build", "-ldflags=OLD NEW"},
+			},
+		}
+		validateCases(cases, val)
+	}
 	{ // adds it after "build"
 		val := "NEW VALUE"
-		cases := []struct {
-			in  []string
-			out []string
-		}{
+		cases := []testcase{
 			{
 				[]string{"build"},
 				[]string{"build", "-ldflags", val},
@@ -50,12 +87,7 @@ func Test_addLdFlags(t *testing.T) {
 				[]string{"build", "-ldflags", val, "-aflag", "-v", "."},
 			},
 		}
-
-		for _, c := range cases {
-			out, err := addLdFlags(c.in, val)
-			require.Nil(t, err)
-			require.Equal(t, c.out, out, "input args=%#v", c.in)
-		}
+		validateCases(cases, val)
 	}
 }
 
@@ -94,12 +126,12 @@ func Test_normalizeArg(t *testing.T) {
 		{ // normalize at the end
 			"-key1",
 			[]string{"a", "b", "-key1", "value"},
-			[]string{"a", "b", `-key1="value"`},
+			[]string{"a", "b", "-key1=value"},
 		},
 		{ // normalize at the beginning
 			"-key2",
 			[]string{"-key2", "value", "a", "b"},
-			[]string{`-key2="value"`, "a", "b"},
+			[]string{"-key2=value", "a", "b"},
 		},
 		{ // already in desired format
 			"-key3",

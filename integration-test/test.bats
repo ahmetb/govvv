@@ -52,3 +52,17 @@
     [[ "${lines[2]}" =~ ^GitBranch=(.*)$ ]]
     [[ "${lines[3]}" =~ ^GitState=(clean|dirty)$ ]]
 }
+
+
+@test "existing -ldflags are preserved" {
+    tmpf="$(mktemp)"
+    run govvv build -o "$tmpf" -ldflags="-X main.MyVariable=myValue" ./integration-test/app-extra-ldflags
+    echo "$output"
+    [ "$status" -eq 0 ]
+
+    run "$tmpf"
+    echo "$output"
+    [ "$status" -eq 0 ]
+    [[ "${lines[0]}" == "MyVariable=myValue" ]]
+    [[ "${lines[1]}" =~ ^GitCommit=[0-9a-f]{7}$ ]]
+}

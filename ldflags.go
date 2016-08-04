@@ -29,11 +29,18 @@ func mkLdFlags(values map[string]string) (string, error) {
 }
 
 // addLdFlags appends the specified ldflags value to args right after the
-// "build" argument. If a -ldflags argument is present, it returns error.
+// "build" argument. If a -ldflags argument is already present, it normalizes
+// the argument (converts [-ldflags, val] into [-ldflags=val]) and appends the
+// given ldflags value.
 func addLdFlags(args []string, ldflags string) ([]string, error) {
-	if findArg(args, "-ldflags") != -1 {
-		return nil, fmt.Errorf("already have a ldflags flag")
+	if ldIdx := findArg(args, "-ldflags"); ldIdx != -1 { // -ldflag exists, normalize and append
+		args = normalizeArg(args, "-ldflags")
+		args[ldIdx] = appendToFlag(args[ldIdx], ldflags)
+		return args, nil
 	}
+
+	// -ldflags argument does not exist in args.
+	// find where to insert the new argument
 	buildIdx := findArg(args, "build")
 	if buildIdx == -1 {
 		return nil, fmt.Errorf("cannot locate where to append -ldflags")
@@ -45,6 +52,20 @@ func addLdFlags(args []string, ldflags string) ([]string, error) {
 	newArgs = append(newArgs, "-ldflags", ldflags)
 	newArgs = append(newArgs, args[buildIdx+1:]...)
 	return newArgs, nil
+}
+
+// appendToFlag appends val to -arg or -arg=... format. If the flag is missing a
+// value, it adds a "=" to the flag before appending the value. If a value
+// already exists, inserts a space character before appending the value.
+func appendToFlag(arg, val string) string {
+	if !strings.ContainsRune(arg, '=') {
+		arg = arg + "="
+	}
+	if arg[len(arg)-1] != '=' && arg[len(arg)-1] != ' ' {
+		arg += " "
+	}
+	arg += val
+	return arg
 }
 
 // findArgs looks for 'arg' or 'arg=...' values in args and returns its index or
@@ -61,19 +82,18 @@ func findArg(args []string, arg string) int {
 
 // normalize finds the -arg in the args and concats its value to the same
 // argument. e.g. [-arg, foo] will be converted to [-arg="foo"] only once.
-//
-// TODO(ahmetb) this might be used in the future to modify existing -ldflags
-// value perhaps.
 func normalizeArg(args []string, arg string) []string {
+	idx := -1
 	for i, v := range args {
 		if v == arg {
-			// concat the next index
-			if i == len(args)-1 { // flag has no value, return
-				return args
-			}
-			val := fmt.Sprintf("%s=%q", arg, args[i+1])
-			return append(append(args[:i], val), args[i+2:]...)
+			idx = i
+			break
 		}
 	}
-	return args
+	if idx == -1 || idx == len(args)-1 { // not found OR -arg has no succeding element
+		return args
+	}
+	newArg := fmt.Sprintf("%s=%s", args[idx], args[idx+1]) // merge values
+	args[idx] = newArg                                     // modify the arg
+	return append(args[:idx+1], args[idx+2:]...)
 }
