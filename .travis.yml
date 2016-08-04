@@ -7,6 +7,9 @@ install:
   - sudo add-apt-repository ppa:duggan/bats --yes
   - sudo apt-get update -qq
   - sudo apt-get install -qq bats
+before_script:
+  - git config --global user.email "test@example.com"
+  - git config --global user.name "Test User"
 script:
   - test -z "$(gofmt -s -l -w .) | tee /dev/stderr)"
   - test -z "$(golint . | tee /dev/stderr)"
