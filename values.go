@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -32,7 +31,6 @@ func GetFlags(dir string) (map[string]string, error) {
 		"main.GitState":  gitState,
 	}
 
-	log.Println("checking version file")
 	if version, err := versionFromFile(dir); err != nil {
 		return nil, fmt.Errorf("failed to get version: %v", err)
 	} else if version != "" {
@@ -52,7 +50,6 @@ func date() string {
 // does not exist, it does not return any errors
 func versionFromFile(dir string) (string, error) {
 	fp := filepath.Join(dir, versionFile)
-	log.Println("version file=", fp)
 	b, err := ioutil.ReadFile(fp)
 	if os.IsNotExist(err) {
 		return "", nil

@@ -1,0 +1,15 @@
+sudo: false
+language: go
+go: go1.6
+install:
+  - go get -u github.com/golang/lint/golint
+  - sudo add-apt-repository ppa:duggan/bats --yes
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq bats
+script:
+  - test -z "$(gofmt -s -l -w .) | tee /dev/stderr)"
+  - test -z "$(golint . | tee /dev/stderr)"
+  - test -z "$(go vet -v ./...) | tee /dev/stderr)"
+  - go list ./... | grep -v '/integration-test/' | xargs go test -v -cover
+  - go install
+  - bats integration-test
