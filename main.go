@@ -14,7 +14,9 @@ func init() {
 func main() {
 	args := os.Args
 	if len(args) < 2 {
-		log.Fatal(`govvv: not enough arguments (try "govvv build .")`)
+		log.Println(`govvv: not enough arguments (try "govvv build .")`)
+		log.Printf("version: %s", versionString())
+		os.Exit(1)
 	} else if args[1] != "build" && args[1] != "install" {
 		log.Fatalf(`govvv: only works with "build" and "install". try "go %s" instead`, args[1])
 	}

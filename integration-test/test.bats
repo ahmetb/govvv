@@ -88,3 +88,13 @@
     [ "$status" -eq 0 ]
     [[ "$output" == "Version=2.0.1" ]]
 }
+
+@test "govvv compiled with govvv" {
+    run govvv install -a
+    echo "$output"
+    [ "$status" -eq 0 ]
+
+    run govvv
+    echo "$output"
+    [[ "${lines[1]}" =~ ^version:\ (.*)@[0-9a-f]{7}-(dirty|clean)$ ]]
+}
