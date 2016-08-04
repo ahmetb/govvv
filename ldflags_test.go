@@ -15,17 +15,25 @@ func Test_mkldFlags_fails(t *testing.T) {
 	require.Nil(t, err, "values can have spaces")
 }
 
-func Test_appendToFlag(t *testing.T) {
-	v := "VALUE"
-	cases := []struct{ in, out string }{
-		{"-arg", "-arg=VALUE"},
-		{"-arg=", "-arg=VALUE"},
-		{"-arg=OLD", "-arg=OLD VALUE"},
-		{"-arg=OLD ", "-arg=OLD VALUE"},
+func Test_mkldFlags(t *testing.T) {
+	{ // empty
+		out, err := mkLdFlags(map[string]string{})
+		require.Nil(t, err)
+		require.Empty(t, out)
 	}
-	for _, c := range cases {
-		out := appendToFlag(c.in, v)
-		require.Equal(t, c.out, out, "input=%q", cases)
+	{ // normal input
+		out, err := mkLdFlags(map[string]string{
+			"key1": "val1",
+			"key2": "val 2",
+		})
+		require.Nil(t, err)
+		expected := []string{
+			"-X key1=val1 -X key2='val 2'",
+			"-X key2='val 2' -X key1=val1"}
+
+		if out != expected[0] && out != expected[1] {
+			t.Fatalf("output: %q, expected: either %q --or-- %q", out, expected[0], expected[1])
+		}
 	}
 }
 
@@ -90,25 +98,37 @@ func Test_addLdFlags(t *testing.T) {
 	}
 }
 
-func Test_mkldFlags(t *testing.T) {
-	{ // empty
-		out, err := mkLdFlags(map[string]string{})
-		require.Nil(t, err)
-		require.Empty(t, out)
+func Test_appendToFlag(t *testing.T) {
+	v := "VALUE"
+	cases := []struct{ in, out string }{
+		{"-arg", "-arg=VALUE"},
+		{"-arg=", "-arg=VALUE"},
+		{"-arg=OLD", "-arg=OLD VALUE"},
+		{"-arg=OLD ", "-arg=OLD VALUE"},
 	}
-	{ // normal input
-		out, err := mkLdFlags(map[string]string{
-			"key1": "val1",
-			"key2": "val 2",
-		})
-		require.Nil(t, err)
-		expected := []string{
-			"-X key1=val1 -X key2='val 2'",
-			"-X key2='val 2' -X key1=val1"}
+	for _, c := range cases {
+		out := appendToFlag(c.in, v)
+		require.Equal(t, c.out, out, "input=%q", cases)
+	}
+}
 
-		if out != expected[0] && out != expected[1] {
-			t.Fatalf("output: %q, expected: either %q --or-- %q", out, expected[0], expected[1])
-		}
+func Test_findArg(t *testing.T) {
+	cases := []struct {
+		in  []string
+		key string
+		out int
+	}{
+		{[]string{"foo", "bar", "quux"}, "none", -1},
+		{[]string{"foo", "bar", "quux"}, "bar", 1},
+		{[]string{"foo", "bar=val", "quux"}, "bar", 1},
+		{[]string{"foo", "bar=val", "quux"}, "bar", 1},
+		{[]string{"-arg1=bar", "-arg2"}, "-arg1", 0},
+		{[]string{"-arg1=foo", "-arg2=foo"}, "-arg2", 1},
+		{[]string{"-foo", "--bar"}, "-bar", -1},
+	}
+	for _, c := range cases {
+		out := findArg(c.in, c.key)
+		require.EqualValues(t, c.out, out, "key=%q args=%#v", c.key, c.in)
 	}
 }
 
@@ -141,25 +161,5 @@ func Test_normalizeArg(t *testing.T) {
 	for _, c := range cases {
 		out := normalizeArg(c.in, c.arg)
 		require.EqualValues(t, c.out, out, "arg=%q input: %#v", c.arg, c.in)
-	}
-}
-
-func Test_findArg(t *testing.T) {
-	cases := []struct {
-		in  []string
-		key string
-		out int
-	}{
-		{[]string{"foo", "bar", "quux"}, "none", -1},
-		{[]string{"foo", "bar", "quux"}, "bar", 1},
-		{[]string{"foo", "bar=val", "quux"}, "bar", 1},
-		{[]string{"foo", "bar=val", "quux"}, "bar", 1},
-		{[]string{"-arg1=bar", "-arg2"}, "-arg1", 0},
-		{[]string{"-arg1=foo", "-arg2=foo"}, "-arg2", 1},
-		{[]string{"-foo", "--bar"}, "-bar", -1},
-	}
-	for _, c := range cases {
-		out := findArg(c.in, c.key)
-		require.EqualValues(t, c.out, out, "key=%q args=%#v", c.key, c.in)
 	}
 }
