@@ -11,11 +11,11 @@
     [[ "$output" == *"not enough arguments"** ]] 
 }
 
-@test "only works for build command" {
+@test "whitelists certain go commands" {
     run govvv doc
     echo "$output"
     [ "$status" -ne 0 ]
-    [[ "$output" == *'only works with "build". try "go doc" instead'** ]] 
+    [[ "$output" == *'only works with "build" and "install". try "go doc" instead'** ]] 
 }
 
 @test "fails on go tool failure and redirects output" {
@@ -25,7 +25,7 @@
     [[ "$output" == *'flag provided but not defined: -invalid-arg'** ]] 
 }
 
-@test "compiles program not without govvv variables" {
+@test "govvv build - program with no compile-time variables" {
     tmp="${BATS_TMPDIR}/a.out"
     run govvv build -o "$tmp" ./integration-test/app-empty  
     echo "$output"
@@ -37,7 +37,18 @@
     [[ "$output" == "Hello, world!" ]]
 }
 
-@test "compiles program using the govvv variables" {
+@test "govvv install - works" {
+    run govvv install ./integration-test/app-empty
+    echo "$output"
+    [ "$status" -eq 0 ]
+
+    run app-empty
+    echo "$output"
+    [ "$status" -eq 0 ]
+    [[ "$output" == "Hello, world!" ]]
+}
+
+@test "govvv build - program with compile-time variables" {
     tmp="${BATS_TMPDIR}/a.out"
     run govvv build -o "$tmp" ./integration-test/app-example  
     echo "$output"
@@ -53,8 +64,7 @@
     [[ "${lines[3]}" =~ ^GitState=(clean|dirty)$ ]]
 }
 
-
-@test "existing -ldflags are preserved" {
+@test "govvv build - preserves given -ldflags" {
     tmp="${BATS_TMPDIR}/a.out"
     run govvv build -o "$tmp" -ldflags="-X main.MyVariable=myValue" ./integration-test/app-extra-ldflags
     echo "$output"
@@ -67,7 +77,7 @@
     [[ "${lines[1]}" =~ ^GitCommit=[0-9a-f]{7}$ ]]
 }
 
-@test "Version is read from ./VERSION file" {
+@test "govvv build - reads Version from ./VERSION file" {
     tmp="${BATS_TMPDIR}/a.out"
     run bash -c "cd ${BATS_TEST_DIRNAME}/app-versioned && govvv build -o ${tmp} ."
     echo "$output"

@@ -15,8 +15,8 @@ func main() {
 	args := os.Args
 	if len(args) < 2 {
 		log.Fatal(`govvv: not enough arguments (try "govvv build .")`)
-	} else if args[1] != "build" {
-		log.Fatalf(`govvv: only works with "build". try "go %s" instead`, args[1])
+	} else if args[1] != "build" && args[1] != "install" {
+		log.Fatalf(`govvv: only works with "build" and "install". try "go %s" instead`, args[1])
 	}
 
 	wd, err := os.Getwd()

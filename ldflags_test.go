@@ -74,12 +74,16 @@ func Test_addLdFlags(t *testing.T) {
 		}
 		validateCases(cases, val)
 	}
-	{ // adds it after "build"
+	{ // adds it after "build" or "install"
 		val := "NEW VALUE"
 		cases := []testcase{
 			{
 				[]string{"build"},
 				[]string{"build", "-ldflags", val},
+			},
+			{
+				[]string{"install"},
+				[]string{"install", "-ldflags", val},
 			},
 			{
 				[]string{"build", "-v"},

@@ -29,9 +29,9 @@ func mkLdFlags(values map[string]string) (string, error) {
 }
 
 // addLdFlags appends the specified ldflags value to args right after the
-// "build" argument. If a -ldflags argument is already present, it normalizes
-// the argument (converts [-ldflags, val] into [-ldflags=val]) and appends the
-// given ldflags value.
+// "build" or "install" arguments. If a -ldflags argument is already present, it
+// normalizes the argument (converts [-ldflags, val] into [-ldflags=val]) and
+// appends the given ldflags value.
 func addLdFlags(args []string, ldflags string) ([]string, error) {
 	if ldIdx := findArg(args, "-ldflags"); ldIdx != -1 { // -ldflag exists, normalize and append
 		args = normalizeArg(args, "-ldflags")
@@ -40,17 +40,20 @@ func addLdFlags(args []string, ldflags string) ([]string, error) {
 	}
 
 	// -ldflags argument does not exist in args.
-	// find where to insert the new argument
-	buildIdx := findArg(args, "build")
-	if buildIdx == -1 {
+	// find where to insert the new argument (after "build" or "install")
+	insertIdx := findArg(args, "build")
+	if insertIdx == -1 {
+		insertIdx = findArg(args, "install")
+	}
+	if insertIdx == -1 {
 		return nil, fmt.Errorf("cannot locate where to append -ldflags")
 	}
 
 	// allocate a new slice to prevent modifying the old one
-	newArgs := make([]string, buildIdx+1, len(args)+2)
-	copy(newArgs, args[:buildIdx+1])
+	newArgs := make([]string, insertIdx+1, len(args)+2)
+	copy(newArgs, args[:insertIdx+1])
 	newArgs = append(newArgs, "-ldflags", ldflags)
-	newArgs = append(newArgs, args[buildIdx+1:]...)
+	newArgs = append(newArgs, args[insertIdx+1:]...)
 	return newArgs, nil
 }
 
