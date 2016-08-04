@@ -14,5 +14,8 @@ var (
 )
 
 func versionString() string {
+	if Version == "" {
+		return "N/A"
+	}
 	return fmt.Sprintf("%s@%s-%s", Version, GitCommit, GitState)
 }

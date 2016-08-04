@@ -47,7 +47,7 @@ func process(dir string, args []string) error {
 		return fmt.Errorf("cannot add ldflags: %v", err)
 	}
 	if err := execGoTool(args); err != nil {
-		return fmt.Errorf("go tool failed: %v", err)
+		return fmt.Errorf("go tool: %v", err)
 	}
 	return nil
 }
