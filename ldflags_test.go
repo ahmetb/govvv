@@ -12,8 +12,7 @@ func Test_mkldFlags_fails(t *testing.T) {
 	require.Contains(t, err.Error(), "key contains whitespaces")
 
 	_, err = mkLdFlags(map[string]string{"key": "val space"})
-	require.NotNil(t, err)
-	require.Contains(t, err.Error(), "value contains whitespaces")
+	require.Nil(t, err, "values can have spaces")
 }
 
 func Test_appendToFlag(t *testing.T) {
@@ -100,12 +99,12 @@ func Test_mkldFlags(t *testing.T) {
 	{ // normal input
 		out, err := mkLdFlags(map[string]string{
 			"key1": "val1",
-			"key2": "val2",
+			"key2": "val 2",
 		})
 		require.Nil(t, err)
 		expected := []string{
-			"-X key1=val1 -X key2=val2",
-			"-X key2=val2 -X key1=val1"}
+			"-X key1=val1 -X key2='val 2'",
+			"-X key2='val 2' -X key1=val1"}
 
 		if out != expected[0] && out != expected[1] {
 			t.Fatalf("output: %q, expected: either %q --or-- %q", out, expected[0], expected[1])

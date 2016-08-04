@@ -16,7 +16,7 @@ func mkLdFlags(values map[string]string) (string, error) {
 			return "", fmt.Errorf("cannot make ldflags for %q: key contains whitespaces", k)
 		}
 		if len(strings.Fields(v)) > 1 {
-			return "", fmt.Errorf("cannot make ldflags for %q: value contains whitespaces", k)
+			v = fmt.Sprintf("'%s'", v) // surround it with single quotes
 		}
 
 		i++
