@@ -26,24 +26,24 @@
 }
 
 @test "compiles program not without govvv variables" {
-    tmpf="$(mktemp)"
-    run govvv build -o "$tmpf" ./integration-test/app-empty  
+    tmp="${BATS_TMPDIR}/a.out"
+    run govvv build -o "$tmp" ./integration-test/app-empty  
     echo "$output"
     [ "$status" -eq 0 ]
 
-    run "$tmpf"
+    run "$tmp"
     echo "$output"
     [ "$status" -eq 0 ]
     [[ "$output" == "Hello, world!" ]]
 }
 
 @test "compiles program using the govvv variables" {
-    tmpf="$(mktemp)"
-    run govvv build -o "$tmpf" ./integration-test/app-versioned  
+    tmp="${BATS_TMPDIR}/a.out"
+    run govvv build -o "$tmp" ./integration-test/app-example  
     echo "$output"
     [ "$status" -eq 0 ]
 
-    run "$tmpf"
+    run "$tmp"
     echo "$output"
     [ "$status" -eq 0 ]
 
@@ -55,14 +55,26 @@
 
 
 @test "existing -ldflags are preserved" {
-    tmpf="$(mktemp)"
-    run govvv build -o "$tmpf" -ldflags="-X main.MyVariable=myValue" ./integration-test/app-extra-ldflags
+    tmp="${BATS_TMPDIR}/a.out"
+    run govvv build -o "$tmp" -ldflags="-X main.MyVariable=myValue" ./integration-test/app-extra-ldflags
     echo "$output"
     [ "$status" -eq 0 ]
 
-    run "$tmpf"
+    run "$tmp"
     echo "$output"
     [ "$status" -eq 0 ]
     [[ "${lines[0]}" == "MyVariable=myValue" ]]
     [[ "${lines[1]}" =~ ^GitCommit=[0-9a-f]{7}$ ]]
+}
+
+@test "Version is read from ./VERSION file" {
+    tmp="${BATS_TMPDIR}/a.out"
+    run bash -c "cd ${BATS_TEST_DIRNAME}/app-versioned && govvv build -o ${tmp} ."
+    echo "$output"
+    [ "$status" -eq 0 ]
+
+    run "$tmp"
+    echo "$output"
+    [ "$status" -eq 0 ]
+    [[ "$output" == "Version=2.0.1" ]]
 }
