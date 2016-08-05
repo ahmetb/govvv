@@ -15,7 +15,7 @@
     run govvv doc
     echo "$output"
     [ "$status" -ne 0 ]
-    [[ "$output" == *'only works with "build" and "install". try "go doc" instead'** ]] 
+    [[ "$output" == *'only works with "build", "install" and "list". try "go doc" instead'** ]] 
 }
 
 @test "fails on go tool failure and redirects output" {
