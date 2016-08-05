@@ -1,5 +1,6 @@
 # Binary
 govvv
+govvv_*amd64*
 
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o

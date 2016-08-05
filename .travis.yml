@@ -2,18 +2,32 @@ sudo: required
 language: go
 go: go1.6
 install:
-  - go get -u github.com/golang/lint/golint
-  - go get -u github.com/stretchr/testify/require
-  - sudo add-apt-repository ppa:duggan/bats --yes
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq bats
+- go get -u github.com/golang/lint/golint
+- go get -u github.com/mitchellh/gox
+- go get -u github.com/stretchr/testify/require
+- sudo add-apt-repository ppa:duggan/bats --yes
+- sudo apt-get update -qq
+- sudo apt-get install -qq bats
 before_script:
-  - git config --global user.email "test@example.com"
-  - git config --global user.name "Test User"
+- git config --global user.email "test@example.com"
+- git config --global user.name "Test User"
 script:
-  - test -z "$(gofmt -s -l -w . | tee /dev/stderr)"
-  - test -z "$(golint . | tee /dev/stderr)"
-  - test -z "$(go vet -v ./... | tee /dev/stderr)"
-  - go list ./... | grep -v '/integration-test/' | xargs go test -v -cover
-  - go install
-  - bats integration-test
+- test -z "$(gofmt -s -l -w . | tee /dev/stderr)"
+- test -z "$(golint . | tee /dev/stderr)"
+- test -z "$(go vet -v ./... | tee /dev/stderr)"
+- go list ./... | grep -v '/integration-test/' | xargs go test -v -cover
+- go install
+- bats integration-test
+before_deploy:
+- gox -gocmd=govvv -os="linux windows darwin" -arch=amd64 .
+deploy:
+  provider: releases
+  api_key:
+    secure: Q71IUY7Lsu4sSIF8pIwmRMmQU78cd8Z2iEJr1xmQkN1PRw98aYK9Zc39mgWmC0a4TumIKhgyevN1hKym+v94U1699Ia+lj+2tEQGGpm+lTzXglQHxu5GYD+6i/N5q7UN0UiM9+M18+6y2Q3qakohDLA+Pc4y8U9dvS97L0mVPdDTyd+SWubw/3NBqF6qag4YVNQrnp5M6iBnE0RdM47h5oX2civQESmQgyK5KJ8ZxNJ1dLehAxwVMO7DrwrcfEMURNT5Hta+v2cllGyHoK2Eb0HidvyhyVMCWfkSezOWL93rMjTmU/t/WmhH6fNcZyPxfiusWnYhVSYgMtguJWHGZ5vcdeNEqirIFHrjfYb2odmA8LEcj+5u4UMPO82rZNzMiM0SwntQ5Bx+uT7IHjvvu6yGaRNTBEq+9N+cPeuuiT1IGjr4WPjz1giCOUv9s9T9ZBWLJk4uDFv6+q0agcNzsRUEO3CI6oqMLPtB+hvTtBpJqFL07ev1CqhWCNoqO22VP0Fya928O5LKafrba0UsbPkJzvIDX29HEKeaOF7sloF8PDYa7nKoMI/7ZZYXfsZE2AlfWTvoFVXnDYVPTSxWyicLNNHQl5mjODYbV6UaExtbiOPn88bHsaBfZyFotXLZOuyT4KuORsYTtzOWjqy2ccdeQE9mUOMy0OLOY9v9zWc=
+  file:
+  -  govvv_linux_amd64
+  - govvv_darwin_amd64
+  - govvv_windows_amd64.exe
+  on:
+    repo: ahmetalpbalkan/govvv
+    tags: true
