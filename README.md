@@ -1,49 +1,38 @@
 # govvv
 
-The simple Go binary versioning tool that wraps the `go build` command. Stop
-worrying about `-ldflags` and use `govvv`:
+The simple Go binary versioning tool that wraps the `go build` command. 
 
-    go get github.com/ahmetalpbalkan/govvv
-    govvv build .
+![](https://cl.ly/0U2m441v392Q/intro-1.gif)
+
+Stop worrying about `-ldflags` and **`go get github.com/ahmetalpbalkan/govvv`** now.
 
 ## Build Variables
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `main.GitCommit` | short commit hash of source tree | `0b5ed7a` |
-| `main.GitBranch` | current branch name the code is built off | `master` |
-| `main.GitState` | whether there are uncommitted changes | `clean` or `dirty` | 
-| `main.BuildDate` | RFC3339 formatted UTC date | `2016-08-04T18:07:54Z` |
-| `main.Version` | contents of `./VERSION` file, if exists | `2.0.0` |
-
-## Installing govvv is easy
-
-Download `govvv` via `go get` or from Releases tab (recommended).
-
-    go get github.com/ahmetalpbalkan/govvv
+| **`main.GitCommit`** | short commit hash of source tree | `0b5ed7a` |
+| **`main.GitBranch`** | current branch name the code is built off | `master` |
+| **`main.GitState`** | whether there are uncommitted changes | `clean` or `dirty` | 
+| **`main.BuildDate`** | RFC3339 formatted UTC date | `2016-08-04T18:07:54Z` |
+| **`main.Version`** | contents of `./VERSION` file, if exists | `2.0.0` |
 
 ## Using govvv is easy
 
-Just add the Build Variables described above to your main package and build your
-code with `govvv`.
+Just add the build variables you want to the `main` package and run:
 
-```go
-package main
+| old          | :sparkles: new :sparkles: |
+| -------------|-----------------|
+| `go build`   | `govvv build`   |
+| `go install` | `govvv install` | 
 
-import "fmt"
+## Version your app with govvv
 
-var (
-    // these values are provided by govvv at compile-time
-	GitCommit, GitState string
-)
+Create a `VERSION` file in your build root directory and add a `Version`
+variable to your `main` package.
 
-func version() string { return GitCommit + "-" + GitState }
+![](https://cl.ly/3Q1K1R2D3b2K/intro-2.gif)
 
-func main() {
-	fmt.Printf("Hello! build=%s", version())
-	// Hello! build=e32f923-dirty
-}
-```
+Do you have your own way of specifying `Version`? No problem:
 
 ## govvv lets you specify custom `-ldflags`
 
@@ -53,6 +42,15 @@ Your existing `-ldflags` argument will still be preserved:
 
 and the `-ldflags` constructed by govvv will be appended to your flag.
 
+## Try govvv today
+
+    $ go get github.com/ahmetalpbalkan/govvv
+
+------
+
+govvv is distributed under [Apache 2.0 License](LICENSE).
+
+Copyright 2016 Ahmet Alp Balkan 
 
 ------
 
