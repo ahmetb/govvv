@@ -17,39 +17,45 @@ func main() {
 		log.Println(`govvv: not enough arguments (try "govvv build .")`)
 		log.Printf("version: %s", versionString())
 		os.Exit(1)
-	} else if args[1] != "build" && args[1] != "install" {
-		log.Fatalf(`govvv: only works with "build" and "install". try "go %s" instead`, args[1])
+	} else if args[1] != "build" && args[1] != "install" && args[1] != "list" {
+		// do not wrap the entire 'go tool'
+		// "list" is wrapped to be compatible with mitchellh/gox.
+		log.Fatalf(`govvv: only works with "build", "install" and "list". try "go %s" instead`, args[1])
 	}
 
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("govvv: cannot get working directory: %v", err)
 	}
-	if err := process(wd, args[1:]); err != nil {
-		log.Fatal(err)
+	args, err = prepArgs(wd, args[1:])
+	if err != nil {
+		log.Fatalf("govvv: failed to prepare args: %v", err)
+	}
+	if err := execGoTool(args); err != nil {
+		log.Fatalf("go tool: %v", err)
 	}
 }
 
-// process calls go tool with provided args (should not contain)
-// the name of the current process in args[0])
-func process(dir string, args []string) error {
+// prepArgs prepares the arguments with correct ldflags if
+// args[0] is "build" or "install".
+func prepArgs(dir string, args []string) ([]string, error) {
+	if len(args) == 0 || (args[0] != "build" && args[0] != "install") {
+		return args, nil
+	}
 	vals, err := GetFlags(dir)
 	if err != nil {
-		return fmt.Errorf("govvv: failed to collect values: %v", err)
+		return nil, fmt.Errorf("failed to collect values: %v", err)
 	}
 	ldflags, err := mkLdFlags(vals)
 	if err != nil {
-		return fmt.Errorf("govvv: failed to compile values: %v", err)
+		return nil, fmt.Errorf("failed to compile values: %v", err)
 	}
 
 	args, err = addLdFlags(args, ldflags)
 	if err != nil {
-		return fmt.Errorf("cannot add ldflags: %v", err)
+		return nil, fmt.Errorf("cannot add ldflags: %v", err)
 	}
-	if err := execGoTool(args); err != nil {
-		return fmt.Errorf("go tool: %v", err)
-	}
-	return nil
+	return args, nil
 }
 
 // execGoTool invokes "go" with given arguments and passes the current
