@@ -59,7 +59,7 @@
     [ "$status" -eq 0 ]
 
     [[ "${lines[0]}" == "BuildDate="*Z ]]
-    [[ "${lines[1]}" =~ ^GitCommit=[0-9a-f]{7}$ ]]
+    [[ "${lines[1]}" =~ ^GitCommit=[0-9a-f]{4,15}$ ]]
     [[ "${lines[2]}" =~ ^GitBranch=(.*)$ ]]
     [[ "${lines[3]}" =~ ^GitState=(clean|dirty)$ ]]
 }
@@ -74,7 +74,7 @@
     echo "$output"
     [ "$status" -eq 0 ]
     [[ "${lines[0]}" == "MyVariable=myValue" ]]
-    [[ "${lines[1]}" =~ ^GitCommit=[0-9a-f]{7}$ ]]
+    [[ "${lines[1]}" =~ ^GitCommit=[0-9a-f]{4,15}$ ]]
 }
 
 @test "govvv build - reads Version from ./VERSION file" {
@@ -96,5 +96,5 @@
 
     run govvv
     echo "$output"
-    [[ "${lines[1]}" =~ ^version:\ (.*)@[0-9a-f]{7}-(dirty|clean)$ ]]
+    [[ "${lines[1]}" =~ ^version:\ (.*)@[0-9a-f]{4,15}-(dirty|clean)$ ]]
 }
