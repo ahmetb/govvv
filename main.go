@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 )
 
 func init() {
@@ -31,9 +34,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("govvv: failed to prepare args: %v", err)
 	}
-	if err := execGoTool(args); err != nil {
-		log.Fatalf("go tool: %v", err)
+	if findArg(args, flDryRun) != -1 {
+		fmt.Println(goToolDryRunCmd(args))
+	} else {
+		if err := execGoTool(args); err != nil {
+			log.Fatalf("go tool: %v", err)
+		}
 	}
+
 }
 
 // prepArgs prepares the arguments with correct ldflags if
@@ -58,10 +66,40 @@ func prepArgs(dir string, args []string) ([]string, error) {
 	return args, nil
 }
 
+const (
+	flDryRun = "-print"
+)
+
 // execGoTool invokes "go" with given arguments and passes the current
 // process' standard streams.
 func execGoTool(args []string) error {
 	cmd := exec.Command("go", args...)
 	cmd.Stdout, cmd.Stderr, cmd.Stdin = os.Stdout, os.Stderr, os.Stdin
 	return cmd.Run()
+}
+
+// goToolDryRunCmd returns a POSIX shell-compatible command that would normally
+// get executed. Not guaranteed to quote and escape the args very well.
+func goToolDryRunCmd(args []string) string {
+	var b bytes.Buffer
+	b.WriteString("go")
+	b.WriteRune(' ')
+	printed := false
+	for _, v := range args {
+		if v == flDryRun {
+			continue
+		}
+		if printed {
+			b.WriteString(" \\\n")
+			b.WriteString("\t")
+		}
+
+		if strings.ContainsAny(v, " \"'\n\t") {
+			v = strconv.QuoteToASCII(v)
+		}
+		b.WriteString(v)
+		printed = true
+
+	}
+	return b.String()
 }

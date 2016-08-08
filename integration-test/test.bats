@@ -25,6 +25,14 @@
     [[ "$output" == *'flag provided but not defined: -invalid-arg'** ]] 
 }
 
+@test "govvv build - dry run" {
+    run govvv build -v -print
+    echo "$output"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"go build \\"* ]]
+    [[ "$output" == *"-ldflags"* ]]
+}
+
 @test "govvv build - program with no compile-time variables" {
     tmp="${BATS_TMPDIR}/a.out"
     run govvv build -o "$tmp" ./integration-test/app-empty  
