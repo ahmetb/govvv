@@ -42,6 +42,16 @@ Your existing `-ldflags` argument will still be preserved:
 
 and the `-ldflags` constructed by govvv will be appended to your flag.
 
+# Don’t want to depend on `govvv`? It’s fine!
+
+You can just pass a `-print` argument and `govvv` will just print the
+`go build` command with `-ldflags` for you and will not execute the go tool:
+
+    $ govvv build -print
+    go build \
+	    -ldflags \
+	    "-X main.GitCommit=57b9870 -X main.GitBranch=dry-run -X main.GitState=dirty -X main.Version=0.1.0 -X main.BuildDate=2016-08-08T20:50:21Z"
+
 ## Try govvv today
 
     $ go get github.com/ahmetalpbalkan/govvv
