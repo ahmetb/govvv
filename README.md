@@ -42,7 +42,7 @@ Your existing `-ldflags` argument will still be preserved:
 
 and the `-ldflags` constructed by govvv will be appended to your flag.
 
-# Don’t want to depend on `govvv`? It’s fine!
+## Don’t want to depend on `govvv`? It’s fine!
 
 You can just pass a `-print` argument and `govvv` will just print the
 `go build` command with `-ldflags` for you and will not execute the go tool:
