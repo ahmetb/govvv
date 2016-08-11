@@ -39,6 +39,7 @@ func TestGetValues(t *testing.T) {
 	require.Regexp(t, "^[0-9a-f]{4,15}$", fl["main.GitCommit"])
 	require.Equal(t, "master", fl["main.GitBranch"])
 	require.Equal(t, "clean", fl["main.GitState"])
+	require.Equal(t, fl["main.GitCommit"], fl["main.GitSummary"])
 }
 
 func TestGetValues_versionFlag(t *testing.T) {

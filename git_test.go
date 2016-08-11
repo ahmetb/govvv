@@ -29,12 +29,12 @@ func TestCommit(t *testing.T) {
 	mkCommit(t, repo, "commit 1")
 	c1, err := repo.Commit()
 	require.Nil(t, err)
-	require.NotEmpty(t, c1)
+	require.Regexp(t, "^[0-9a-f]{4,15}$", c1)
 
 	mkCommit(t, repo, "commit 2")
 	c2, err := repo.Commit()
 	require.Nil(t, err)
-	require.NotEmpty(t, c2)
+	require.Regexp(t, "^[0-9a-f]{4,15}$", c2)
 
 	// commit hash changed
 	require.NotEqual(t, c1, c2)
@@ -81,6 +81,41 @@ func TestBranch(t *testing.T) {
 	_, err = repo.exec("checkout", "-b", "foo")
 	require.Nil(t, err)
 	require.EqualValues(t, "foo", repo.Branch())
+}
+
+func TestSummary(t *testing.T) {
+	repo := newRepo(t)
+	defer os.RemoveAll(repo.dir)
+
+	// no tags yet, should be just short commit number
+	mkCommit(t, repo, "commit 1")
+	s, err := repo.Summary()
+	require.Nil(t, err)
+	require.Regexp(t, "^[0-9a-f]{4,15}$", s)
+
+	// if commit is a tag, tag is returned
+	_, err = repo.exec("tag", "v1.0.0")
+	require.Nil(t, err)
+	s, err = repo.Summary()
+	require.Nil(t, err)
+	require.EqualValues(t, "v1.0.0", s)
+
+	// add 3 more commits, it should be in format v1.0.0-2-*
+	mkCommit(t, repo, "commit 2")
+	mkCommit(t, repo, "commit 3")
+	s, err = repo.Summary()
+	require.Nil(t, err)
+	require.Regexp(t, "^v1.0.0-2-.*$", s)
+
+	// add a dirty file
+	f, err := ioutil.TempFile(repo.dir, "") // contaminate
+	require.Nil(t, err, "failed to create test file")
+	f.Close()
+	_, err = repo.exec("add", f.Name())
+	require.Nil(t, err)
+	s, err = repo.Summary()
+	require.Nil(t, err)
+	require.Regexp(t, ".*-dirty$", s)
 }
 
 // Test utilities
