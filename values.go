@@ -23,12 +23,17 @@ func GetFlags(dir string) (map[string]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get repository state: %v", err)
 	}
+	gitSummary, err := repo.Summary()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get repository summary: %v", err)
+	}
 
 	v := map[string]string{
-		"main.BuildDate": date(),
-		"main.GitCommit": gitCommit,
-		"main.GitBranch": gitBranch,
-		"main.GitState":  gitState,
+		"main.BuildDate":  date(),
+		"main.GitCommit":  gitCommit,
+		"main.GitBranch":  gitBranch,
+		"main.GitState":   gitState,
+		"main.GitSummary": gitSummary,
 	}
 
 	if version, err := versionFromFile(dir); err != nil {

@@ -62,6 +62,7 @@
     [[ "${lines[1]}" =~ ^GitCommit=[0-9a-f]{4,15}$ ]]
     [[ "${lines[2]}" =~ ^GitBranch=(.*)$ ]]
     [[ "${lines[3]}" =~ ^GitState=(clean|dirty)$ ]]
+    [[ "${lines[4]}" =~ ^GitSummary=(.*)$ ]]
 }
 
 @test "govvv build - preserves given -ldflags" {

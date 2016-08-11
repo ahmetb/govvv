@@ -53,3 +53,12 @@ func (g git) Branch() string {
 	}
 	return out
 }
+
+// Summary returns the output of "git describe --tags --dirty --always".
+func (g git) Summary() (string, error) {
+	out, err := g.exec("describe", "--tags", "--dirty", "--always")
+	if err != nil {
+		return "", err
+	}
+	return out, err
+}
