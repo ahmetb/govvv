@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"time"
 )
 
@@ -38,6 +39,12 @@ func GetFlags(dir string) (map[string]string, error) {
 
 	if version, err := versionFromFile(dir); err != nil {
 		return nil, fmt.Errorf("failed to get version: %v", err)
+	} else if version == "" {
+		// ex: v0.1.2 0.1.2 0.1.2.dev3
+		matched, err := regexp.MatchString(`^v?(\d+\.){1,2}(\d+)`, gitSummary)
+		if err == nil && matched {
+			v["main.Version"] = gitSummary
+		}
 	} else if version != "" {
 		v["main.Version"] = version
 	}
