@@ -14,13 +14,18 @@ func init() {
 	log.SetFlags(0)
 }
 
+const (
+	flDryRun             = "-print"
+	flDryRunPrintLdFlags = "-print-ldflags"
+)
+
 func main() {
 	args := os.Args
 	if len(args) < 2 {
 		log.Println(`govvv: not enough arguments (try "govvv build .")`)
 		log.Printf("version: %s", versionString())
 		os.Exit(1)
-	} else if args[1] != "build" && args[1] != "install" && args[1] != "list" {
+	} else if args[1] != "build" && args[1] != "install" && args[1] != "list" && args[1] != flDryRunPrintLdFlags {
 		// do not wrap the entire 'go tool'
 		// "list" is wrapped to be compatible with mitchellh/gox.
 		log.Fatalf(`govvv: only works with "build", "install" and "list". try "go %s" instead`, args[1])
@@ -30,45 +35,32 @@ func main() {
 	if err != nil {
 		log.Fatalf("govvv: cannot get working directory: %v", err)
 	}
-	args, err = prepArgs(wd, args[1:])
+	vals, err := GetFlags(wd)
 	if err != nil {
-		log.Fatalf("govvv: failed to prepare args: %v", err)
-	}
-	if findArg(args, flDryRun) != -1 {
-		fmt.Println(goToolDryRunCmd(args))
-	} else {
-		if err := execGoTool(args); err != nil {
-			log.Fatalf("go tool: %v", err)
-		}
-	}
-
-}
-
-// prepArgs prepares the arguments with correct ldflags if
-// args[0] is "build" or "install".
-func prepArgs(dir string, args []string) ([]string, error) {
-	if len(args) == 0 || (args[0] != "build" && args[0] != "install") {
-		return args, nil
-	}
-	vals, err := GetFlags(dir)
-	if err != nil {
-		return nil, fmt.Errorf("failed to collect values: %v", err)
+		log.Fatalf("failed to collect values: %v", err)
 	}
 	ldflags, err := mkLdFlags(vals)
 	if err != nil {
-		return nil, fmt.Errorf("failed to compile values: %v", err)
+		log.Fatalf("failed to compile values: %v", err)
 	}
-
-	args, err = addLdFlags(args, ldflags)
+	if findArg(args, flDryRunPrintLdFlags) != -1 {
+		fmt.Print(ldflags)
+		return
+	}
+	args, err = addLdFlags(args[1:], ldflags)
 	if err != nil {
-		return nil, fmt.Errorf("cannot add ldflags: %v", err)
+		log.Fatalf("failed to add ldflags to args: %v", err)
 	}
-	return args, nil
-}
 
-const (
-	flDryRun = "-print"
-)
+	if findArg(args, flDryRun) != -1 {
+		fmt.Println(goToolDryRunCmd(args))
+		return
+	}
+
+	if err := execGoTool(args); err != nil {
+		log.Fatalf("go tool: %v", err)
+	}
+}
 
 // execGoTool invokes "go" with given arguments and passes the current
 // process' standard streams.
@@ -86,7 +78,7 @@ func goToolDryRunCmd(args []string) string {
 	b.WriteRune(' ')
 	printed := false
 	for _, v := range args {
-		if v == flDryRun {
+		if v == flDryRun || v == flDryRunPrintLdFlags {
 			continue
 		}
 		if printed {

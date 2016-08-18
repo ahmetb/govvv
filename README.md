@@ -53,6 +53,11 @@ You can just pass a `-print` argument and `govvv` will just print the
 	    -ldflags \
 	    "-X main.GitCommit=57b9870 -X main.GitBranch=dry-run -X main.GitState=dirty -X main.Version=0.1.0 -X main.BuildDate=2016-08-08T20:50:21Z"
 
+Still don't want to wrap the `go` tool? Well, try `-print-ldflags` and run as:
+
+    $ go build -ldflags="$(govvv -print-ldflags)"
+
+
 ## Try govvv today
 
     $ go get github.com/ahmetalpbalkan/govvv

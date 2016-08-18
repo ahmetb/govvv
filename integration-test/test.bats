@@ -33,6 +33,13 @@
     [[ "$output" == *"-ldflags"* ]]
 }
 
+@test "govvv -print-ldflags" {
+    run govvv -print-ldflags
+    echo "$output"
+    [ "$status" -eq 0 ]
+    [[ "$output" =~ ^-X\ .* ]]
+}
+
 @test "govvv build - program with no compile-time variables" {
     tmp="${BATS_TMPDIR}/a.out"
     run govvv build -o "$tmp" ./integration-test/app-empty  
