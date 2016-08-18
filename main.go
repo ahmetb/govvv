@@ -47,9 +47,13 @@ func main() {
 		fmt.Print(ldflags)
 		return
 	}
-	args, err = addLdFlags(args[1:], ldflags)
-	if err != nil {
-		log.Fatalf("failed to add ldflags to args: %v", err)
+	args = args[1:] // rm executable name
+
+	if args[0] == "build" || args[0] == "install" {
+		args, err = addLdFlags(args, ldflags)
+		if err != nil {
+			log.Fatalf("failed to add ldflags to args: %v", err)
+		}
 	}
 
 	if findArg(args, flDryRun) != -1 {
