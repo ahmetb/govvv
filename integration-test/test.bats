@@ -33,8 +33,8 @@
     [[ "$output" == *"-ldflags"* ]]
 }
 
-@test "govvv -print-ldflags" {
-    run govvv -print-ldflags
+@test "govvv -flags" {
+    run govvv -flags
     echo "$output"
     [ "$status" -eq 0 ]
     [[ "$output" =~ ^-X\ .* ]]

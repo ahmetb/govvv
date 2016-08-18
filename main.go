@@ -16,7 +16,7 @@ func init() {
 
 const (
 	flDryRun             = "-print"
-	flDryRunPrintLdFlags = "-print-ldflags"
+	flDryRunPrintLdFlags = "-flags"
 )
 
 func main() {
