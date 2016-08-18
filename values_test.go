@@ -64,7 +64,7 @@ func TestGetValues_versionFlagFromGit(t *testing.T) {
 	repo := newRepo(t)
 	defer os.RemoveAll(repo.dir)
 
-	for _, okTag := range []string{"0.0.1", "v0.0.1", "v0.0.1-dev"} {
+	for _, okTag := range []string{"0.0.1", "v0.0.1", "v0.0.1-dev", "v0.0.1.2-beta1"} {
 		mkCommit(t, repo, "commit "+okTag)
 		mkTag(t, repo, okTag)
 		fl, err := GetFlags(repo.dir)
