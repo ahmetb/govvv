@@ -55,7 +55,7 @@ You can just pass a `-print` argument and `govvv` will just print the
 
 Still don't want to wrap the `go` tool? Well, try `-print-ldflags` and run as:
 
-    $ go build -ldflags="$(govvv -print-ldflags)"
+    $ go build -ldflags="$(govvv -flags)"
 
 
 ## Try govvv today
