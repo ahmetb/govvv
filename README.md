@@ -10,28 +10,26 @@ Stop worrying about `-ldflags` and **`go get github.com/ahmetalpbalkan/govvv`** 
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| **`<pkg>.GitCommit`** | short commit hash of source tree | `0b5ed7a` |
-| **`<pkg>.GitBranch`** | current branch name the code is built off | `master` |
-| **`<pkg>.GitState`** | whether there are uncommitted changes | `clean` or `dirty` | 
-| **`<pkg>.GitSummary`** | output of `git describe --tags --dirty --always` | `v1.0.0`, <br/>`v1.0.1-5-g585c78f-dirty`, <br/> `fbd157c` |
-| **`<pkg>.BuildDate`** | RFC3339 formatted UTC date | `2016-08-04T18:07:54Z` |
-| **`<pkg>.Version`** | contents of `./VERSION` file, if exists | `2.0.0` |
-
-Note `<pkg>` defaults to `main` when not specified via `-pkg` flag.
+| **`main.GitCommit`** | short commit hash of source tree | `0b5ed7a` |
+| **`main.GitBranch`** | current branch name the code is built off | `master` |
+| **`main.GitState`** | whether there are uncommitted changes | `clean` or `dirty` | 
+| **`main.GitSummary`** | output of `git describe --tags --dirty --always` | `v1.0.0`, <br/>`v1.0.1-5-g585c78f-dirty`, <br/> `fbd157c` |
+| **`main.BuildDate`** | RFC3339 formatted UTC date | `2016-08-04T18:07:54Z` |
+| **`main.Version`** | contents of `./VERSION` file, if exists | `2.0.0` |
 
 ## Using govvv is easy
 
-Just add the build variables you want to the package and run:
+Just add the build variables you want to the `main` package and run:
 
-| old          | :sparkles: new :sparkles: | :sparkles: new (specifying package) :sparkles: |
-| -------------|-----------------| ---------------------------------------------------- |
-| `go build`   | `govvv build`   | `govvv build -pkg "github.com/acct/proj/version"`   |
-| `go install` | `govvv install` | `govvv install  -pkg "github.com/acct/proj/version"` | 
+| old          | :sparkles: new :sparkles: |
+| -------------|-----------------|
+| `go build`   | `govvv build`   |
+| `go install` | `govvv install` | 
 
 ## Version your app with govvv
 
 Create a `VERSION` file in your build root directory and add a `Version`
-variable to your package.
+variable to your `main` package.
 
 ![](https://cl.ly/3Q1K1R2D3b2K/intro-2.gif)
 
@@ -57,12 +55,20 @@ You can just pass a `-print` argument and `govvv` will just print the
 
 Still don’t want to wrap the `go` tool? Well, try `-flags` to retrieve the LDFLAGS govvv prepares:
 
-```
-$ go build -ldflags="$(govvv -flags)"
+    $ go build -ldflags="$(govvv -flags)"
 
-# or specifying 'version' subpackage
-$ go build -ldflags="$(govvv -flags -pkg $(go list ./version))"
-```    
+## Want to use a different package?
+
+You can pass a `-pkg` argument with the full package name, and `govvv` will 
+set the build variables in that package instead of `main`.  For example:
+
+```
+# build with govvv
+$ govvv build -pkg github.com/myacct/myproj/mypkg
+
+# build with go
+$ go build -ldflags="$(govvv -flags -pkg $(go list ./mypkg))"
+```
 
 
 ## Try govvv today

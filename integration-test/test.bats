@@ -104,6 +104,13 @@
     [[ "${lines[5]}" =~ ^GitSummary=(.*)$ ]]
 }
 
+@test "govvv -flags and -pkg" {
+    run govvv -flags -pkg github.com/ahmetalpbalkan/govvv/integration-test/app-different-package/mypkg ./integration-test/app-different-package
+    echo "$output"
+    [ "$status" -eq 0 ]
+    [[ "$output" =~ ^-X\ github\.com/ahmetalpbalkan/govvv/integration-test/app-different-package/mypkg\.(.*)$ ]]
+}
+
 @test "govvv build - preserves given -ldflags" {
     tmp="${BATS_TMPDIR}/a.out"
     run govvv build -o "$tmp" -ldflags="-X main.MyVariable=myValue" ./integration-test/app-extra-ldflags

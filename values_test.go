@@ -13,7 +13,7 @@ func TestGetValues_error(t *testing.T) {
 	repo := newRepo(t)
 	defer os.RemoveAll(repo.dir)
 
-	_, err := GetFlags(repo.dir, defaultPackage)
+	_, err := GetFlags(repo.dir, "main")
 	require.NotNil(t, err)
 	require.Contains(t, err.Error(), "failed to get commit")
 }
@@ -31,7 +31,7 @@ func TestGetValues(t *testing.T) {
 	mkCommit(t, repo, "commit 2")
 
 	// read the flags
-	fl, err := GetFlags(repo.dir, defaultPackage)
+	fl, err := GetFlags(repo.dir, "main")
 	require.Nil(t, err)
 
 	// validate the flags
@@ -49,13 +49,13 @@ func TestGetValues_versionFlag(t *testing.T) {
 	mkCommit(t, repo, "commit 1")
 
 	// there is no main.Version flag
-	fl, err := GetFlags(repo.dir, defaultPackage)
+	fl, err := GetFlags(repo.dir, "main")
 	require.Nil(t, err)
 	require.Empty(t, fl["main.Version"])
 
 	// add version file and get the value back
 	require.Nil(t, ioutil.WriteFile(filepath.Join(repo.dir, "VERSION"), []byte("2.0.0-beta\n"), 0600))
-	fl, err = GetFlags(repo.dir, defaultPackage)
+	fl, err = GetFlags(repo.dir, "main")
 	require.Nil(t, err)
 	require.Equal(t, "2.0.0-beta", fl["main.Version"])
 }
