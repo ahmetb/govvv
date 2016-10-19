@@ -86,6 +86,24 @@
     [[ "${lines[4]}" =~ ^GitSummary=(.*)$ ]]
 }
 
+@test "govvv build - compile-time variables in different package" {
+    tmp="${BATS_TMPDIR}/a.out"
+    run govvv build -pkg github.com/ahmetalpbalkan/govvv/integration-test/app-different-package/mypkg -o "$tmp" ./integration-test/app-different-package
+    echo "$output"
+    [ "$status" -eq 0 ]
+
+    run "$tmp"
+    echo "$output"
+    [ "$status" -eq 0 ]
+
+    [[ "${lines[0]}" == "Version=2.0.1" ]]
+    [[ "${lines[1]}" == "BuildDate="*Z ]]
+    [[ "${lines[2]}" =~ ^GitCommit=[0-9a-f]{4,15}$ ]]
+    [[ "${lines[3]}" =~ ^GitBranch=(.*)$ ]]
+    [[ "${lines[4]}" =~ ^GitState=(clean|dirty)$ ]]
+    [[ "${lines[5]}" =~ ^GitSummary=(.*)$ ]]
+}
+
 @test "govvv build - preserves given -ldflags" {
     tmp="${BATS_TMPDIR}/a.out"
     run govvv build -o "$tmp" -ldflags="-X main.MyVariable=myValue" ./integration-test/app-extra-ldflags
