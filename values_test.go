@@ -13,7 +13,7 @@ func TestGetValues_error(t *testing.T) {
 	repo := newRepo(t)
 	defer os.RemoveAll(repo.dir)
 
-	_, err := GetFlags(repo.dir)
+	_, err := GetFlags(repo.dir, defaultPackage)
 	require.NotNil(t, err)
 	require.Contains(t, err.Error(), "failed to get commit")
 }
@@ -31,7 +31,7 @@ func TestGetValues(t *testing.T) {
 	mkCommit(t, repo, "commit 2")
 
 	// read the flags
-	fl, err := GetFlags(repo.dir)
+	fl, err := GetFlags(repo.dir, defaultPackage)
 	require.Nil(t, err)
 
 	// validate the flags
@@ -49,15 +49,35 @@ func TestGetValues_versionFlag(t *testing.T) {
 	mkCommit(t, repo, "commit 1")
 
 	// there is no main.Version flag
-	fl, err := GetFlags(repo.dir)
+	fl, err := GetFlags(repo.dir, defaultPackage)
 	require.Nil(t, err)
 	require.Empty(t, fl["main.Version"])
 
 	// add version file and get the value back
 	require.Nil(t, ioutil.WriteFile(filepath.Join(repo.dir, "VERSION"), []byte("2.0.0-beta\n"), 0600))
-	fl, err = GetFlags(repo.dir)
+	fl, err = GetFlags(repo.dir, defaultPackage)
 	require.Nil(t, err)
 	require.Equal(t, "2.0.0-beta", fl["main.Version"])
+}
+
+func TestGetValues_pkgFlag(t *testing.T) {
+	// prepare the repo
+	repo := newRepo(t)
+	defer os.RemoveAll(repo.dir)
+	mkCommit(t, repo, "commit 1")
+	mkCommit(t, repo, "commit 2")
+
+	// read the flags for custom package
+	pkg := "github.com/acct/coolproject/version"
+	fl, err := GetFlags(repo.dir, pkg)
+	require.Nil(t, err)
+
+	// validate the flags
+	require.Contains(t, fl, pkg+".BuildDate")
+	require.Contains(t, fl, pkg+".GitCommit")
+	require.Contains(t, fl, pkg+".GitBranch")
+	require.Contains(t, fl, pkg+".GitState")
+	require.Contains(t, fl, pkg+".GitSummary")
 }
 
 func Test_versionFromFile_notFound(t *testing.T) {

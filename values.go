@@ -12,7 +12,7 @@ import (
 const versionFile = "VERSION"
 
 // GetFlags collects data to be passed as ldflags.
-func GetFlags(dir string) (map[string]string, error) {
+func GetFlags(dir, pkg string) (map[string]string, error) {
 	repo := git{dir}
 	gitBranch := repo.Branch()
 	gitCommit, err := repo.Commit()
@@ -29,17 +29,17 @@ func GetFlags(dir string) (map[string]string, error) {
 	}
 
 	v := map[string]string{
-		"main.BuildDate":  date(),
-		"main.GitCommit":  gitCommit,
-		"main.GitBranch":  gitBranch,
-		"main.GitState":   gitState,
-		"main.GitSummary": gitSummary,
+		pkg + ".BuildDate":  date(),
+		pkg + ".GitCommit":  gitCommit,
+		pkg + ".GitBranch":  gitBranch,
+		pkg + ".GitState":   gitState,
+		pkg + ".GitSummary": gitSummary,
 	}
 
 	if version, err := versionFromFile(dir); err != nil {
 		return nil, fmt.Errorf("failed to get version: %v", err)
 	} else if version != "" {
-		v["main.Version"] = version
+		v[pkg+".Version"] = version
 	}
 
 	return v, nil
