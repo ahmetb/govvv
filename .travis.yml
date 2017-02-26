@@ -29,5 +29,5 @@ deploy:
   - govvv_darwin_amd64
   - govvv_windows_amd64.exe
   on:
-    repo: ahmetalpbalkan/govvv
+    repo: ahmetb/govvv
     tags: true

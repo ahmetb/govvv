@@ -4,7 +4,7 @@ The simple Go binary versioning tool that wraps the `go build` command.
 
 ![](https://cl.ly/0U2m441v392Q/intro-1.gif)
 
-Stop worrying about `-ldflags` and **`go get github.com/ahmetalpbalkan/govvv`** now.
+Stop worrying about `-ldflags` and **`go get github.com/ahmetb/govvv`** now.
 
 ## Build Variables
 
@@ -60,7 +60,7 @@ Still don’t want to wrap the `go` tool? Well, try `-flags` to retrieve the LDF
 
 ## Try govvv today
 
-    $ go get github.com/ahmetalpbalkan/govvv
+    $ go get github.com/ahmetb/govvv
 
 ------
 
@@ -70,4 +70,4 @@ Copyright 2016 Ahmet Alp Balkan
 
 ------
 
-[![Build Status](https://travis-ci.org/ahmetalpbalkan/govvv.svg?branch=master)](https://travis-ci.org/ahmetalpbalkan/govvv)
+[![Build Status](https://travis-ci.org/ahmetb/govvv.svg?branch=master)](https://travis-ci.org/ahmetb/govvv)
