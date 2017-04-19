@@ -9,6 +9,7 @@ var (
 	GitBranch  string
 	GitState   string
 	GitSummary string
+	Version    string
 )
 
 func main() {
@@ -17,4 +18,5 @@ func main() {
 	fmt.Printf("GitBranch=%s\n", GitBranch)
 	fmt.Printf("GitState=%s\n", GitState)
 	fmt.Printf("GitSummary=%s\n", GitSummary)
+	fmt.Printf("Version=%s\n", Version)
 }

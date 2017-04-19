@@ -134,3 +134,8 @@ func mkCommit(t *testing.T, repo git, msg string) {
 	_, err := repo.exec("commit", "--allow-empty", "--message", msg)
 	require.Nil(t, err, "failed to commit: %+v", err)
 }
+
+func mkTag(t *testing.T, repo git, msg string) {
+	_, err := repo.exec("tag", msg)
+	require.Nil(t, err, "failed to tag: %+v", err)
+}

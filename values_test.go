@@ -60,6 +60,26 @@ func TestGetValues_versionFlag(t *testing.T) {
 	require.Equal(t, "2.0.0-beta", fl["main.Version"])
 }
 
+func TestGetValues_versionFlagFromGit(t *testing.T) {
+	repo := newRepo(t)
+	defer os.RemoveAll(repo.dir)
+
+	for _, okTag := range []string{"0.0.1", "v0.0.1", "v0.0.1-dev", "v0.0.1.2-beta1"} {
+		mkCommit(t, repo, "commit "+okTag)
+		mkTag(t, repo, okTag)
+		fl, err := GetFlags(repo.dir)
+		require.Nil(t, err)
+		require.Equal(t, okTag, fl["main.Version"])
+	}
+	for _, badTag := range []string{"docs", "docs-0.0.1", "dev"} {
+		mkCommit(t, repo, "commit "+badTag)
+		mkTag(t, repo, badTag)
+		fl, err := GetFlags(repo.dir)
+		require.Nil(t, err)
+		require.Equal(t, "", fl["main.Version"])
+	}
+}
+
 func Test_versionFromFile_notFound(t *testing.T) {
 	dir := tmpDir(t)
 	defer os.RemoveAll(dir)
