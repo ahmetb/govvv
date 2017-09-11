@@ -12,8 +12,6 @@ before_script:
 - git config --global user.email "test@example.com"
 - git config --global user.name "Test User"
 script:
-- sed -i "s/GOVV_TEST_PACKAGE/$(go list|sed 's/\//\\\//g')/g" ./integration-test/app-different-package/main.go
-- sed -i "s/GOVV_TEST_PACKAGE/$(go list|sed 's/\//\\\//g')/g" ./integration-test/test.bats
 - test -z "$(gofmt -s -l -w . | tee /dev/stderr)"
 - test -z "$(golint . | tee /dev/stderr)"
 - test -z "$(go vet -v ./... | tee /dev/stderr)"

@@ -8,21 +8,21 @@
     run govvv
     echo "$output"
     [ "$status" -ne 0 ]
-    [[ "$output" == *"not enough arguments"** ]] 
+    [[ "$output" == *"not enough arguments"** ]]
 }
 
 @test "whitelists certain go commands" {
     run govvv doc
     echo "$output"
     [ "$status" -ne 0 ]
-    [[ "$output" == *'only works with "build", "install" and "list". try "go doc" instead'** ]] 
+    [[ "$output" == *'only works with "build", "install" and "list". try "go doc" instead'** ]]
 }
 
 @test "fails on go tool failure and redirects output" {
     run govvv build -invalid-arg
     echo "$output"
     [ "$status" -ne 0 ]
-    [[ "$output" == *'flag provided but not defined: -invalid-arg'** ]] 
+    [[ "$output" == *'flag provided but not defined: -invalid-arg'** ]]
 }
 
 @test "govvv build - dry run" {
@@ -48,7 +48,7 @@
 
 @test "govvv build - program with no compile-time variables" {
     tmp="${BATS_TMPDIR}/a.out"
-    run govvv build -o "$tmp" ./integration-test/app-empty  
+    run govvv build -o "$tmp" ./integration-test/app-empty
     echo "$output"
     [ "$status" -eq 0 ]
 
@@ -71,7 +71,7 @@
 
 @test "govvv build - program with compile-time variables" {
     tmp="${BATS_TMPDIR}/a.out"
-    run govvv build -o "$tmp" ./integration-test/app-example  
+    run govvv build -o "$tmp" ./integration-test/app-example
     echo "$output"
     [ "$status" -eq 0 ]
 
@@ -89,7 +89,7 @@
 @test "govvv build - compile-time variables in different package" {
     tmp="${BATS_TMPDIR}/a.out"
 
-    run bash -c "cd ${BATS_TEST_DIRNAME}/app-different-package && govvv build -pkg GOVV_TEST_PACKAGE/integration-test/app-different-package/mypkg -o $tmp ."
+    run bash -c "cd ${BATS_TEST_DIRNAME}/app-different-package && govvv build -pkg github.com/ahmetb/govvv/integration-test/app-different-package/mypkg -o $tmp"
     echo "$output"
     [ "$status" -eq 0 ]
 
@@ -107,11 +107,11 @@
 
 @test "govvv -flags and -pkg" {
 
-    run bash -c "cd ${BATS_TEST_DIRNAME}/app-different-package && govvv -flags -pkg GOVV_TEST_PACKAGE/integration-test/app-different-package/mypkg ."
+    run bash -c "cd ${BATS_TEST_DIRNAME}/app-different-package && govvv -flags -pkg github.com/ahmetb/govvv/integration-test/app-different-package/mypkg"
     echo "$output"
     [ "$status" -eq 0 ]
 
-    [[ "$output" =~ -X\ GOVV_TEST_PACKAGE/integration-test/app-different-package/mypkg\.Version=2.0.1-app-different-package ]]
+    [[ "$output" =~ -X\ github.com/ahmetb/govvv/integration-test/app-different-package/mypkg\.Version=2.0.1-app-different-package ]]
 }
 
 @test "govvv build - preserves given -ldflags" {

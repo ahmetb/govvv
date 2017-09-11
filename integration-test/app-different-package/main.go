@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"GOVV_TEST_PACKAGE/integration-test/app-different-package/mypkg"
+	"github.com/ahmetb/govvv/integration-test/app-different-package/mypkg"
 )
 
 func main() {
