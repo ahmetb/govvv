@@ -139,6 +139,18 @@
     [[ "$output" == "Version=2.0.1-app-versioned" ]]
 }
 
+@test "govvv build - ./VERSION file overridden by -version option" {
+    tmp="${BATS_TMPDIR}/a.out"
+    run bash -c "cd ${BATS_TEST_DIRNAME}/app-versioned && govvv build -o ${tmp} -version 1.2.3-command-line"
+    echo "$output"
+    [ "$status" -eq 0 ]
+
+    run "$tmp"
+    echo "$output"
+    [ "$status" -eq 0 ]
+    [[ "$output" == "Version=1.2.3-command-line" ]]
+}
+
 @test "govvv compiled with govvv" {
     touch main.go
     run govvv install

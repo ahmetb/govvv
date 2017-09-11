@@ -19,13 +19,14 @@ const (
 	flDryRun             = "-print"
 	flDryRunPrintLdFlags = "-flags"
 	flPackage            = "-pkg"
+	flVersion            = "-version"
 )
 
 var (
 	// govvvDirectives is mapping of govvv directives, which must be elided
 	// when constructing the final go tool command, to a boolean which
 	// indicates whether the directive takes an argument or not.
-	govvvDirectives = map[string]bool{flDryRun: false, flDryRunPrintLdFlags: false, flPackage: true}
+	govvvDirectives = map[string]bool{flDryRun: false, flDryRunPrintLdFlags: false, flPackage: true, flVersion: true}
 )
 
 func main() {
@@ -54,6 +55,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to collect values: %v", err)
 	}
+
+	// calculate the version
+	version, err := versionFromFile(wd)
+	if err != nil {
+		log.Fatalf("failed to get version: %v", err)
+	}
+	if value, ok := collectGovvvDirective(args, flVersion); ok {
+		version = value
+	}
+	versionValues[pkg+".Version"] = version
+
 	ldflags, err := mkLdFlags(versionValues)
 	if err != nil {
 		log.Fatalf("failed to compile values: %v", err)

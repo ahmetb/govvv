@@ -36,12 +36,6 @@ func GetFlags(dir, pkg string) (map[string]string, error) {
 		pkg + ".GitSummary": gitSummary,
 	}
 
-	if version, err := versionFromFile(dir); err != nil {
-		return nil, fmt.Errorf("failed to get version: %v", err)
-	} else if version != "" {
-		v[pkg+".Version"] = version
-	}
-
 	return v, nil
 }
 
