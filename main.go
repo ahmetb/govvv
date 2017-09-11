@@ -15,8 +15,10 @@ func init() {
 }
 
 const (
+	defaultPackage       = "main"
 	flDryRun             = "-print"
 	flDryRunPrintLdFlags = "-flags"
+	flPackage            = "-pkg"
 )
 
 func main() {
@@ -25,7 +27,7 @@ func main() {
 		log.Println(`govvv: not enough arguments (try "govvv build .")`)
 		log.Printf("version: %s", versionString())
 		os.Exit(1)
-	} else if args[1] != "build" && args[1] != "install" && args[1] != "list" && args[1] != flDryRunPrintLdFlags {
+	} else if args[1] != "build" && args[1] != "install" && args[1] != "list" && args[1] != flDryRunPrintLdFlags && args[1] != flPackage {
 		// do not wrap the entire 'go tool'
 		// "list" is wrapped to be compatible with mitchellh/gox.
 		log.Fatalf(`govvv: only works with "build", "install" and "list". try "go %s" instead`, args[1])
@@ -35,7 +37,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("govvv: cannot get working directory: %v", err)
 	}
-	vals, err := GetFlags(wd)
+	pkg := defaultPackage
+	args = normalizeArg(args, flPackage)
+	if idx := findArg(args, flPackage); idx != -1 {
+		pkg = strings.Split(args[idx], "=")[1]
+		// remove...can't pass through to go tool
+		args = append(args[:idx], args[idx+1:]...)
+	}
+
+	vals, err := GetFlags(wd, pkg)
 	if err != nil {
 		log.Fatalf("failed to collect values: %v", err)
 	}
