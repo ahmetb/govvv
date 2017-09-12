@@ -140,12 +140,12 @@
 }
 
 @test "govvv compiled with govvv" {
-    run govvv build
+    touch main.go
+    run govvv install
     echo "$output"
     [ "$status" -eq 0 ]
 
-    run ./govvv
+    run govvv
     echo "$output"
     [[ "${lines[1]}" =~ ^version:\ (.*)@[0-9a-f]{4,15}-(dirty|clean)$ ]]
-	rm ./govvv
 }
