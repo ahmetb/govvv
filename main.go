@@ -21,13 +21,17 @@ const (
 	flPackage            = "-pkg"
 )
 
+var (
+	govvvDirectives = map[string]bool{flDryRun: false, flDryRunPrintLdFlags: false, flPackage: true}
+)
+
 func main() {
 	args := os.Args
 	if len(args) < 2 {
 		log.Println(`govvv: not enough arguments (try "govvv build .")`)
 		log.Printf("version: %s", versionString())
 		os.Exit(1)
-	} else if args[1] != "build" && args[1] != "install" && args[1] != "list" && args[1] != flDryRunPrintLdFlags && args[1] != flPackage {
+	} else if args[1] != "build" && args[1] != "install" && args[1] != "list" && !isGovvvDirective(args[1]) {
 		// do not wrap the entire 'go tool'
 		// "list" is wrapped to be compatible with mitchellh/gox.
 		log.Fatalf(`govvv: only works with "build", "install" and "list". try "go %s" instead`, args[1])
@@ -37,26 +41,26 @@ func main() {
 	if err != nil {
 		log.Fatalf("govvv: cannot get working directory: %v", err)
 	}
+
 	pkg := defaultPackage
-	args = normalizeArg(args, flPackage)
-	if idx := findArg(args, flPackage); idx != -1 {
-		pkg = strings.Split(args[idx], "=")[1]
-		// remove...can't pass through to go tool
-		args = append(args[:idx], args[idx+1:]...)
+	if value, ok := collectGovvvDirective(args, flPackage); ok {
+		pkg = value
 	}
 
-	vals, err := GetFlags(wd, pkg)
+	versionValues, err := GetFlags(wd, pkg)
 	if err != nil {
 		log.Fatalf("failed to collect values: %v", err)
 	}
-	ldflags, err := mkLdFlags(vals)
+	ldflags, err := mkLdFlags(versionValues)
 	if err != nil {
 		log.Fatalf("failed to compile values: %v", err)
 	}
-	if findArg(args, flDryRunPrintLdFlags) != -1 {
+
+	if _, ok := collectGovvvDirective(args, flDryRunPrintLdFlags); ok {
 		fmt.Print(ldflags)
 		return
 	}
+
 	args = args[1:] // rm executable name
 
 	if args[0] == "build" || args[0] == "install" {
@@ -66,10 +70,12 @@ func main() {
 		}
 	}
 
-	if findArg(args, flDryRun) != -1 {
+	if _, ok := collectGovvvDirective(args, flDryRun); ok {
 		fmt.Println(goToolDryRunCmd(args))
 		return
 	}
+
+	args = scrubGovvvDirectives(args)
 
 	if err := execGoTool(args); err != nil {
 		log.Fatalf("go tool: %v", err)
@@ -91,10 +97,7 @@ func goToolDryRunCmd(args []string) string {
 	b.WriteString("go")
 	b.WriteRune(' ')
 	printed := false
-	for _, v := range args {
-		if v == flDryRun || v == flDryRunPrintLdFlags {
-			continue
-		}
+	for _, v := range scrubGovvvDirectives(args) {
 		if printed {
 			b.WriteString(" \\\n")
 			b.WriteString("\t")
@@ -108,4 +111,51 @@ func goToolDryRunCmd(args []string) string {
 
 	}
 	return b.String()
+}
+
+// isGovvvDirective returns true if the arg is a goov directive, and false
+// otherwise.
+func isGovvvDirective(arg string) bool {
+	_, ok := govvvDirectives[arg]
+	return ok
+}
+
+// scrubGovvvDirectives filters out goov directs to return a clean set of args
+// that can be passed to the go command.
+func scrubGovvvDirectives(args []string) (filtered []string) {
+	filtered = []string{}
+	skipping := 0
+	for _, arg := range args {
+		if skipping > 0 {
+			skipping -= 1
+			continue
+		}
+		if hasArgument, ok := govvvDirectives[arg]; ok {
+			if hasArgument {
+				skipping = 1
+			}
+		} else {
+			filtered = append(filtered, arg)
+		}
+	}
+	return filtered
+}
+
+// collectGovvvDirective searches the args array for a directive and a possible
+// argument for that directive.  It returns that argument, or "", if the
+// directive takes none, and an indication if the directive was actually found.
+func collectGovvvDirective(args []string, directive string) (argument string, ok bool) {
+	for i, arg := range args {
+		if directive == arg {
+			hasArgument, _ := govvvDirectives[arg]
+			if !hasArgument {
+				return "", true
+			} else if i+1 < len(args) {
+				return args[i+1], true
+			} else {
+				break
+			}
+		}
+	}
+	return "", false
 }
