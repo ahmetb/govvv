@@ -127,7 +127,7 @@ func scrubGovvvDirectives(args []string) (filtered []string) {
 	skipping := 0
 	for _, arg := range args {
 		if skipping > 0 {
-			skipping -= 1
+			skipping--
 			continue
 		}
 		if hasArgument, ok := govvvDirectives[arg]; ok {
