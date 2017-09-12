@@ -22,6 +22,9 @@ const (
 )
 
 var (
+	// govvvDirectives is mapping of govvv directives, which must be elided
+	// when constructing the final go tool command, to a boolean which
+	// indicates whether the directive takes an argument or not.
 	govvvDirectives = map[string]bool{flDryRun: false, flDryRunPrintLdFlags: false, flPackage: true}
 )
 
@@ -113,14 +116,14 @@ func goToolDryRunCmd(args []string) string {
 	return b.String()
 }
 
-// isGovvvDirective returns true if the arg is a goov directive, and false
+// isGovvvDirective returns true if the arg is a govvv directive, and false
 // otherwise.
 func isGovvvDirective(arg string) bool {
 	_, ok := govvvDirectives[arg]
 	return ok
 }
 
-// scrubGovvvDirectives filters out goov directs to return a clean set of args
+// scrubGovvvDirectives filters out govvv directs to return a clean set of args
 // that can be passed to the go command.
 func scrubGovvvDirectives(args []string) (filtered []string) {
 	filtered = []string{}
