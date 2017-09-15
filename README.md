@@ -57,6 +57,19 @@ Still don’t want to wrap the `go` tool? Well, try `-flags` to retrieve the LDF
 
     $ go build -ldflags="$(govvv -flags)"
 
+## Want to use a different package?
+
+You can pass a `-pkg` argument with the full package name, and `govvv` will 
+set the build variables in that package instead of `main`.  For example:
+
+```
+# build with govvv
+$ govvv build -pkg github.com/myacct/myproj/mypkg
+
+# build with go
+$ go build -ldflags="$(govvv -flags -pkg $(go list ./mypkg))"
+```
+
 
 ## Try govvv today
 
