@@ -42,24 +42,6 @@ func TestGetValues(t *testing.T) {
 	require.Equal(t, fl["main.GitCommit"], fl["main.GitSummary"])
 }
 
-func TestGetValues_versionFlag(t *testing.T) {
-	// prepare the repo
-	repo := newRepo(t)
-	defer os.RemoveAll(repo.dir)
-	mkCommit(t, repo, "commit 1")
-
-	// there is no main.Version flag
-	fl, err := GetFlags(repo.dir, "main")
-	require.Nil(t, err)
-	require.Empty(t, fl["main.Version"])
-
-	// add version file and get the value back
-	require.Nil(t, ioutil.WriteFile(filepath.Join(repo.dir, "VERSION"), []byte("2.0.0-beta\n"), 0600))
-	fl, err = GetFlags(repo.dir, "main")
-	require.Nil(t, err)
-	require.Equal(t, "2.0.0-beta", fl["main.Version"])
-}
-
 func TestGetValues_pkgFlag(t *testing.T) {
 	// prepare the repo
 	repo := newRepo(t)
