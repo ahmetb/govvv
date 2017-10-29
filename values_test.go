@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetValues_error(t *testing.T) {
+func TestGetFlags_error(t *testing.T) {
 	repo := newRepo(t)
 	defer os.RemoveAll(repo.dir)
 
@@ -23,7 +23,7 @@ func Test_date(t *testing.T) {
 	require.Regexp(t, "^[0-9]{4}(-[0-9]{2}){2}T([0-9]{2}:){2}[0-9]{2}Z$", v)
 }
 
-func TestGetValues(t *testing.T) {
+func TestGetFlags(t *testing.T) {
 	// prepare the repo
 	repo := newRepo(t)
 	defer os.RemoveAll(repo.dir)
@@ -42,7 +42,72 @@ func TestGetValues(t *testing.T) {
 	require.Equal(t, fl["main.GitCommit"], fl["main.GitSummary"])
 }
 
-func TestGetValues_pkgFlag(t *testing.T) {
+func TestGetFlags_versionDefault(t *testing.T) {
+	// prepare the repo
+	repo := newRepo(t)
+	defer os.RemoveAll(repo.dir)
+	mkCommit(t, repo, "commit 1")
+
+	// there is no main.Version flag
+	fl, err := GetFlags(repo.dir, []string{})
+	require.Nil(t, err)
+	require.NotContains(t, fl, "main.Version")
+}
+
+func TestGetFlags_justVersionFlag(t *testing.T) {
+	// prepare the repo
+	repo := newRepo(t)
+	defer os.RemoveAll(repo.dir)
+	mkCommit(t, repo, "commit 1")
+
+	// -version is specified and there is no VERSION file
+	fl, err := GetFlags(repo.dir, []string{flVersion, "2.0.0-RC01"})
+	require.Nil(t, err)
+	require.Equal(t, "2.0.0-RC01", fl["main.Version"])
+}
+
+func TestGetFlags_versionFile(t *testing.T) {
+	// prepare the repo
+	repo := newRepo(t)
+	defer os.RemoveAll(repo.dir)
+	mkCommit(t, repo, "commit 1")
+
+	// add version file and get the value back
+	require.Nil(t, ioutil.WriteFile(filepath.Join(repo.dir, "VERSION"), []byte("2.0.0-beta\n"), 0600))
+	fl, err := GetFlags(repo.dir, []string{})
+	require.Nil(t, err)
+	require.Equal(t, "2.0.0-beta", fl["main.Version"])
+}
+
+func TestGetFlags_versionFlagOverrides(t *testing.T) {
+	// prepare the repo
+	repo := newRepo(t)
+	defer os.RemoveAll(repo.dir)
+	mkCommit(t, repo, "commit 1")
+
+	// add version file
+	require.Nil(t, ioutil.WriteFile(filepath.Join(repo.dir, "VERSION"), []byte("2.0.0-beta\n"), 0600))
+
+	// -version is specified and there is na VERSION file (flag takes precedence)
+	fl, err := GetFlags(repo.dir, []string{flVersion, "2.0.0-RC01"})
+	require.Nil(t, err)
+	require.Equal(t, "2.0.0-RC01", fl["main.Version"])
+}
+
+func TestGetFlags_versionFileError(t *testing.T) {
+	// prepare the repo
+	repo := newRepo(t)
+	defer os.RemoveAll(repo.dir)
+	mkCommit(t, repo, "commit 1")
+
+	// add version file and get the value back
+	require.Nil(t, ioutil.WriteFile(filepath.Join(repo.dir, "VERSION"), []byte("2.0.0-beta\n"), 0000))
+	fl, err := GetFlags(repo.dir, []string{})
+	require.Nil(t, fl)
+	require.Contains(t, err.Error(), "failed to read version file")
+}
+
+func TestGetFlags_pkgFlag(t *testing.T) {
 	// prepare the repo
 	repo := newRepo(t)
 	defer os.RemoveAll(repo.dir)
@@ -66,7 +131,8 @@ func Test_versionFromFile_notFound(t *testing.T) {
 	dir := tmpDir(t)
 	defer os.RemoveAll(dir)
 
-	_, err := versionFromFile(dir)
+	v, err := versionFromFile(dir)
+	require.Equal(t, "", v)
 	require.Nil(t, err)
 }
 

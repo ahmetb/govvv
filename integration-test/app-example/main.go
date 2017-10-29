@@ -4,6 +4,7 @@ import "fmt"
 
 var (
 	// These fields are populated by govvv
+	Version    = "untouched"
 	BuildDate  string
 	GitCommit  string
 	GitBranch  string
@@ -12,6 +13,7 @@ var (
 )
 
 func main() {
+	fmt.Printf("Version=%s\n", Version)
 	fmt.Printf("BuildDate=%s\n", BuildDate)
 	fmt.Printf("GitCommit=%s\n", GitCommit)
 	fmt.Printf("GitBranch=%s\n", GitBranch)
