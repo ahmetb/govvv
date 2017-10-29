@@ -141,7 +141,7 @@
 }
 
 @test "govvv build - reads Version from -version option" {
-    tmp="/Users/acabrera/a.out"
+    tmp="${BATS_TMPDIR}/a.out"
     run bash -c "cd ${BATS_TEST_DIRNAME}/app-example && govvv build -o ${tmp} -version 1.2.3-command-line"
     [ "$status" -eq 0 ]
     echo "$output"
