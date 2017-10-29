@@ -12,7 +12,7 @@ import (
 const versionFile = "VERSION"
 
 // GetFlags collects data to be passed as ldflags.
-func GetFlags(dir string, args [] string) (map[string]string, error) {
+func GetFlags(dir string, args []string) (map[string]string, error) {
 	repo := git{dir}
 	gitBranch := repo.Branch()
 	gitCommit, err := repo.Commit()
