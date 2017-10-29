@@ -46,25 +46,10 @@ func main() {
 		log.Fatalf("govvv: cannot get working directory: %v", err)
 	}
 
-	pkg := defaultPackage
-	if value, ok := collectGovvvDirective(args, flPackage); ok {
-		pkg = value
-	}
-
-	versionValues, err := GetFlags(wd, pkg)
+	versionValues, err := GetFlags(wd, args)
 	if err != nil {
 		log.Fatalf("failed to collect values: %v", err)
 	}
-
-	// calculate the version
-	version, err := versionFromFile(wd)
-	if err != nil {
-		log.Fatalf("failed to get version: %v", err)
-	}
-	if value, ok := collectGovvvDirective(args, flVersion); ok {
-		version = value
-	}
-	versionValues[pkg+".Version"] = version
 
 	ldflags, err := mkLdFlags(versionValues)
 	if err != nil {

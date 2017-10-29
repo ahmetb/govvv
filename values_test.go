@@ -13,7 +13,7 @@ func TestGetValues_error(t *testing.T) {
 	repo := newRepo(t)
 	defer os.RemoveAll(repo.dir)
 
-	_, err := GetFlags(repo.dir, "main")
+	_, err := GetFlags(repo.dir, []string{})
 	require.NotNil(t, err)
 	require.Contains(t, err.Error(), "failed to get commit")
 }
@@ -31,7 +31,7 @@ func TestGetValues(t *testing.T) {
 	mkCommit(t, repo, "commit 2")
 
 	// read the flags
-	fl, err := GetFlags(repo.dir, "main")
+	fl, err := GetFlags(repo.dir, []string{})
 	require.Nil(t, err)
 
 	// validate the flags
@@ -51,7 +51,7 @@ func TestGetValues_pkgFlag(t *testing.T) {
 
 	// read the flags for custom package
 	pkg := "github.com/acct/coolproject/version"
-	fl, err := GetFlags(repo.dir, pkg)
+	fl, err := GetFlags(repo.dir, []string{flPackage, pkg})
 	require.Nil(t, err)
 
 	// validate the flags
