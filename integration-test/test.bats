@@ -148,6 +148,7 @@
     [ "$status" -eq 0 ]
 
     run "$tmp"
+    echo "$output"
     [ "$status" -eq 0 ]
 
     [[ "${lines[0]}" == "1.2.3-command-line" ]]
