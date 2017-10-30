@@ -71,7 +71,7 @@
 
 @test "govvv build - program with compile-time variables" {
     tmp="${BATS_TMPDIR}/a.out"
-    run govvv build -o "$tmp" ./integration-test/app-example
+    run bash -c "cd ${BATS_TEST_DIRNAME}/app-example && govvv build -o ${tmp}"
     echo "$output"
     [ "$status" -eq 0 ]
 
@@ -151,7 +151,7 @@
     echo "$output"
     [ "$status" -eq 0 ]
 
-    [[ "${lines[0]}" == "1.2.3-command-line" ]]
+    [[ "${lines[0]}" == "Version=1.2.3-command-line" ]]
     [[ "${lines[1]}" == "BuildDate="*Z ]]
     [[ "${lines[2]}" =~ ^GitCommit=[0-9a-f]{4,15}$ ]]
     [[ "${lines[3]}" =~ ^GitBranch=(.*)$ ]]
