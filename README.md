@@ -15,7 +15,7 @@ Stop worrying about `-ldflags` and **`go get github.com/ahmetb/govvv`** now.
 | **`main.GitState`** | whether there are uncommitted changes | `clean` or `dirty` | 
 | **`main.GitSummary`** | output of `git describe --tags --dirty --always` | `v1.0.0`, <br/>`v1.0.1-5-g585c78f-dirty`, <br/> `fbd157c` |
 | **`main.BuildDate`** | RFC3339 formatted UTC date | `2016-08-04T18:07:54Z` |
-| **`main.Version`** | contents of `./VERSION` file, if exists | `2.0.0` |
+| **`main.Version`** | contents of `./VERSION` file, if exists, or the value passed via the `-version` option | `2.0.0` |
 
 ## Using govvv is easy
 
@@ -69,7 +69,19 @@ $ govvv build -pkg github.com/myacct/myproj/mypkg
 # build with go
 $ go build -ldflags="$(govvv -flags -pkg $(go list ./mypkg))"
 ```
+## Want to use a different version?
 
+You can pass a `-version` argument with the desired version, and `govvv` will 
+use the specified version instead of obtaining it from the `./VERSION` file.
+For example:
+
+```
+# build with govvv
+$ govvv build -version 1.2.3
+
+# build with go
+$ go build -ldflags="$(govvv -flags -version 1.2.3)"
+```
 
 ## Try govvv today
 
