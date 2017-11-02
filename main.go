@@ -26,7 +26,11 @@ var (
 	// govvvDirectives is mapping of govvv directives, which must be elided
 	// when constructing the final go tool command, to a boolean which
 	// indicates whether the directive takes an argument or not.
-	govvvDirectives = map[string]bool{flDryRun: false, flDryRunPrintLdFlags: false, flPackage: true, flVersion: true}
+	govvvDirectives = map[string]bool{
+		flDryRun:             false,
+		flDryRunPrintLdFlags: false,
+		flPackage:            true,
+		flVersion:            true}
 )
 
 func main() {
