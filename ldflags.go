@@ -15,12 +15,13 @@ func mkLdFlags(values map[string]string) (string, error) {
 		if len(strings.Fields(k)) > 1 {
 			return "", fmt.Errorf("cannot make ldflags for %q: key contains whitespaces", k)
 		}
+		ldFlag := fmt.Sprintf("-X %s=%s", k, v)
 		if len(strings.Fields(v)) > 1 {
-			v = fmt.Sprintf("'%s'", v) // surround it with single quotes
+			ldFlag = fmt.Sprintf("-X '%s=%s'", k, v) // surround the value with single quotes
 		}
 
 		i++
-		b.WriteString(fmt.Sprintf("-X %s=%s", k, v))
+		b.WriteString(ldFlag)
 		if i != len(values) {
 			b.WriteByte(' ')
 		}

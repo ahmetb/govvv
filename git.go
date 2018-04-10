@@ -31,7 +31,7 @@ func (g git) Commit() (string, error) {
 
 // CommitMsg returns the commit message of the most recent commit
 func (g git) CommitMsg() (string, error) {
-	return g.exec("log", "-1", "--pretty=%%B")
+	return g.exec("log", "-1", "--pretty=%B")
 }
 
 // State returns the repository state indicating whether
