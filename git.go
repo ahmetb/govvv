@@ -29,6 +29,11 @@ func (g git) Commit() (string, error) {
 	return g.exec("rev-parse", "--short", "HEAD")
 }
 
+// CommitMsg returns the commit message of the most recent commit
+func (g git) CommitMsg() (string, error) {
+	return g.exec("log", "-1", "--pretty=%B")
+}
+
 // State returns the repository state indicating whether
 // it is "clean" or "dirty".
 func (g git) State() (string, error) {

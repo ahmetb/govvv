@@ -11,6 +11,7 @@ Stop worrying about `-ldflags` and **`go get github.com/ahmetb/govvv`** now.
 | Variable | Description | Example |
 |----------|-------------|---------|
 | **`main.GitCommit`** | short commit hash of source tree | `0b5ed7a` |
+| **`main.GitCommitMsg`** | output of `git log -1 --pretty=%B` | `Initial commit` |
 | **`main.GitBranch`** | current branch name the code is built off | `master` |
 | **`main.GitState`** | whether there are uncommitted changes | `clean` or `dirty` | 
 | **`main.GitSummary`** | output of `git describe --tags --dirty --always` | `v1.0.0`, <br/>`v1.0.1-5-g585c78f-dirty`, <br/> `fbd157c` |
