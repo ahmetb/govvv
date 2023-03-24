@@ -2,6 +2,8 @@
 
 The simple Go binary versioning tool that wraps the `go build` command. 
 
+> :warning::warning::warning: **DEPRECATED:** Go now offers [build info](https://pkg.go.dev/runtime/debug#BuildInfo) natively. Please migrate to use that instead. I am no longer planning to maintain this project.
+
 ![](https://cl.ly/0U2m441v392Q/intro-1.gif)
 
 Stop worrying about `-ldflags` and **`go get github.com/ahmetb/govvv`** now.
